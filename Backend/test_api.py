@@ -4,6 +4,7 @@ import json
 
 class TestAPI(unittest.TestCase):
     BASE_URL = "http://127.0.0.1:5000"
+    headers = {'Content-Type': 'application/json'}
 
     def test_create_perceptron(self):
         url = f"{self.BASE_URL}/api/create_perceptron"
@@ -12,8 +13,7 @@ class TestAPI(unittest.TestCase):
             "learning_rate": 0.01,
             "epochs": 1000
         }
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(url, data=json.dumps(payload), headers=headers)
+        response = requests.post(url, data=json.dumps(payload), headers=self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json(), list)
         self.assertEqual(len(response.json()), 3)  # 2 input size + 1 bias
@@ -26,17 +26,16 @@ class TestAPI(unittest.TestCase):
             "learning_rate": 0.01,
             "epochs": 1000
         }
-
-        create_response = requests.post(create_url, data=json.dumps(create_payload), headers=headers)
+        create_response = requests.post(create_url, data=json.dumps(create_payload), headers=self.headers)
         self.assertEqual(create_response.status_code, 200)
-        headers = {'Content-Type': 'application/json'}
+
         # Now train the perceptron
         train_url = f"{self.BASE_URL}/api/train_perceptron"
         train_payload = {
             "training_data": [[0, 0], [0, 1], [1, 0], [1, 1]],
             "labels": [0, 0, 0, 1]
         }
-        train_response = requests.post(train_url, data=json.dumps(train_payload), headers=headers)
+        train_response = requests.post(train_url, data=json.dumps(train_payload), headers=self.headers)
         self.assertEqual(train_response.status_code, 200)
         self.assertIsInstance(train_response.json(), list)
         self.assertEqual(len(train_response.json()), 3)  # 2 input size + 1 bias

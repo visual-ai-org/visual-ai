@@ -1,3 +1,4 @@
+import numpy as np
 from flask import Flask, jsonify, request
 
 from ml.ml import create_and_return_perceptron, train_perceptron
