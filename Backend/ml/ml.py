@@ -1,9 +1,10 @@
-from .perceptron import create_perceptron, get_perceptron
-import numpy as np
+from perceptron import create_perceptron, get_perceptron
+
 
 def create_and_return_perceptron():
     perceptron = create_perceptron(input_size=2)
     return perceptron.get_weights()
+
 
 def train_perceptron(training_data, labels):
     perceptron = get_perceptron()

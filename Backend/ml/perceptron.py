@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Perceptron:
     def __init__(self, input_size, learning_rate=0.01, epochs=1000):
         self.weights = np.zeros(input_size + 1)
@@ -20,13 +21,16 @@ class Perceptron:
     def get_weights(self):
         return self.weights.tolist()
 
+
 # Singleton instance of the Perceptron
 perceptron_instance = None
+
 
 def create_perceptron(input_size, learning_rate=0.01, epochs=1000):
     global perceptron_instance
     perceptron_instance = Perceptron(input_size, learning_rate, epochs)
     return perceptron_instance
+
 
 def get_perceptron():
     global perceptron_instance
