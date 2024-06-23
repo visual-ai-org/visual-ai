@@ -43,6 +43,7 @@ def handle_logistic_regression(data):
 
     def update_callback(weights):
         emit('weight_update', {'weights': weights}, broadcast=True)
+        print('Weights:', weights)
 
     weights = logistic_regression(identifier, training_data, labels, update_callback)
     emit('training_complete', {'weights': weights})
