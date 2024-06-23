@@ -7,3 +7,4 @@
 /.idea
 /venv/
 /frontend/package-lock.json
+/frontend/node_modules
