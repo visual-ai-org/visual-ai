@@ -69,6 +69,7 @@ class TestAPI(unittest.TestCase):
 
         received = self.socketio.get_received()
         weight_updates = [msg['args'][0]['weights'] for msg in received if msg['name'] == 'weight_update']
+        print(weight_updates)
         training_complete = [msg['args'][0]['weights'] for msg in received if msg['name'] == 'training_complete']
 
         self.assertGreater(len(weight_updates), 0)  # Ensure we received updates
