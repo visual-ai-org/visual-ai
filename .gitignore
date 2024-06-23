@@ -6,4 +6,4 @@
 .idea/visual-ai.iml
 /.idea
 /venv/
-package-lock.json
+/frontend/package-lock.json
