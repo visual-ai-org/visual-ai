@@ -1,11 +1,13 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from ml.ml import create_and_return_perceptron, train_perceptron, logistic_regression
 import numpy as np
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode='eventlet')
+CORS(app, resources={r"/*": {"origins": "*"}})
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 
 @app.route('/')
