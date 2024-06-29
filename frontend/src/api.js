@@ -4,12 +4,27 @@ import socket_io from 'socket.io-client';
 
 const baseUrl = 'http://localhost:5000';
 
+async function test() {
+    const url = `${baseUrl}`;
+    try {
+        const response = await axios.get(url, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error.response?.data || error.message);
+        throw new Error(error.response?.data || error.message);
+    }
+}
+
 async function createPerceptron(identifier, inputSize, learningRate, epochs) {
     const url = `${baseUrl}/api/create_perceptron`;
     const payload = {
         identifier: identifier,
-        inputSize: inputSize,
-        learningRate: learningRate,
+        input_size: inputSize,
+        learning_rate: learningRate,
         epochs: epochs
     };
 
@@ -30,7 +45,7 @@ async function trainPerceptron(identifier, trainingData, labels, logistic = fals
     const url = `${baseUrl}/api/train_perceptron`;
     const payload = {
         identifier: identifier,
-        trainingData: trainingData,
+        training_data: trainingData,
         labels: labels,
         logistic: logistic
     };
@@ -143,10 +158,16 @@ const ApiComponent = () => {
     return (
         <div>
             <h1>API Interaction Example</h1>
-            <button onClick={() => createPerceptron('perceptron1', 2, 0.01, 1000).then(data => console.log('Created Perceptron:', data))}>
+            <button
+                onClick={() => test()}>
+                Test
+            </button>
+            <button
+                onClick={() => createPerceptron('perceptron1', 2, 0.01, 1000).then(data => console.log('Created Perceptron:', data))}>
                 Create Perceptron
             </button>
-            <button onClick={() => trainPerceptron('perceptron1', [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1]).then(data => console.log('Trained Perceptron:', data))}>
+            <button
+                onClick={() => trainPerceptron('perceptron1', [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1]).then(data => console.log('Trained Perceptron:', data))}>
                 Train Perceptron
             </button>
             {/*<button onClick={() => createLayer('layer1', 3, 2, 0.01, 1000).then(data => console.log('Created Layer:', data))}>*/}
