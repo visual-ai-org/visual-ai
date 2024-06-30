@@ -72,4 +72,4 @@ def process_updates():
 socketio.start_background_task(target=process_updates)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app)
