@@ -1,13 +1,21 @@
+import eventlet
+
+eventlet.monkey_patch()  # This must be the very first import
+
+import time
+import numpy as np
+from queue import Queue
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from ml.ml import create_and_return_perceptron, train_perceptron, logistic_regression
-import numpy as np
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
+
+update_queue = Queue()
 
 
 @app.route('/')
@@ -44,12 +52,24 @@ def handle_logistic_regression(data):
     labels = np.array(data.get('labels'))
 
     def update_callback(weights):
-        emit('weight_update', {'weights': weights}, broadcast=True)
-        print('Weights:', weights)
+        print(f'Putting weights in queue: {weights}')  # Debug statement
+        update_queue.put(weights)
 
     weights = logistic_regression(identifier, training_data, labels, update_callback)
-    emit('training_complete', {'weights': weights})
+    socketio.emit('training_complete', {'weights': weights})
 
+
+def process_updates():
+    while True:
+        if not update_queue.empty():
+            weights = update_queue.get()
+            print(f'Emitting weights: {weights}')  # Debug statement
+            socketio.emit('weight_update', {'weights': weights})
+        time.sleep(0.02)  # Sleep for 1 second
+
+
+# Start the background task using SocketIO's start_background_task
+socketio.start_background_task(target=process_updates)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app)
