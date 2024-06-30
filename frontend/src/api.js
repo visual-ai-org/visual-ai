@@ -14,8 +14,8 @@ async function test() {
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error.response?.data || error.message);
-        throw new Error(error.response?.data || error.message);
+        console.error('Error:', error.message);
+        throw new Error(error.message);
     }
 }
 
@@ -36,8 +36,8 @@ async function createPerceptron(identifier, inputSize, learningRate, epochs) {
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error.response?.data || error.message);
-        throw new Error(error.response?.data || error.message);
+        console.error('Error:', error.message);
+        throw new Error(error.message);
     }
 }
 
@@ -59,8 +59,8 @@ async function trainPerceptron(identifier, trainingData, labels, logistic = fals
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error.response?.data || error.message);
-        throw new Error(error.response?.data || error.message);
+        console.error('Error:', error.message);
+        throw new Error(error.message);
     }
 }
 
@@ -115,6 +115,10 @@ const ApiComponent = () => {
     const [finalWeights, setFinalWeights] = useState(null);
 
     useEffect(() => {
+
+    }, []);
+
+    const handleLogisticRegression = () => {
         const socket = socket_io("localhost:5000/", {
             transports: ["websocket"],
             cors: {
@@ -136,23 +140,17 @@ const ApiComponent = () => {
             setFinalWeights(data.weights);
         });
 
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
-
-    const handleLogisticRegression = () => {
-        const socket = socket_io("localhost:5000/", {
-            transports: ["websocket"],
-            cors: {
-                origin: "http://localhost:3000/",
-            },
-        });
         socket.emit('logistic_regression', {
             identifier: 'perceptron1',
             training_data: [[0, 0], [0, 1], [1, 0], [1, 1]],
             labels: [0, 0, 0, 1]
         });
+
+        return () => {
+            socket.disconnect();
+            console.log('Disconnected from server');
+        };
+
     };
 
     return (
