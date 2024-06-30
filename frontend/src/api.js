@@ -132,7 +132,7 @@ const ApiComponent = () => {
 
         socket.on('weight_update', (data) => {
             console.log('Weight update:', data.weights);
-            setWeights(prevWeights => [...prevWeights, data.weights]);
+            setWeights([data.weights]);
         });
 
         socket.on('training_complete', (data) => {

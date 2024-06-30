@@ -1,4 +1,5 @@
 import eventlet
+
 eventlet.monkey_patch()  # This must be the very first import
 
 import time
@@ -57,13 +58,15 @@ def handle_logistic_regression(data):
     weights = logistic_regression(identifier, training_data, labels, update_callback)
     socketio.emit('training_complete', {'weights': weights})
 
+
 def process_updates():
     while True:
         if not update_queue.empty():
             weights = update_queue.get()
             print(f'Emitting weights: {weights}')  # Debug statement
             socketio.emit('weight_update', {'weights': weights})
-        time.sleep(1)  # Sleep for 1 second
+        time.sleep(0.02)  # Sleep for 1 second
+
 
 # Start the background task using SocketIO's start_background_task
 socketio.start_background_task(target=process_updates)
