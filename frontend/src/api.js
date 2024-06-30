@@ -150,7 +150,7 @@ const ApiComponent = () => {
         });
         socket.emit('logistic_regression', {
             identifier: 'perceptron1',
-            trainingData: [[0, 0], [0, 1], [1, 0], [1, 1]],
+            training_data: [[0, 0], [0, 1], [1, 0], [1, 1]],
             labels: [0, 0, 0, 1]
         });
     };
