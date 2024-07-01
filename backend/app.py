@@ -1,5 +1,9 @@
 import eventlet
 
+from backend.ml.CNN import CNN
+from backend.ml.NN import NN
+from backend.ml.RNN import RNN
+
 eventlet.monkey_patch()  # This must be the very first import
 
 import time
@@ -8,7 +12,6 @@ from queue import Queue
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
-from ml.ml import create_and_return_perceptron, train_perceptron, logistic_regression
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -16,6 +19,8 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 update_queue = Queue()
+# In-memory dataset storage
+training_data = {'features': [], 'target': []}
 
 
 @app.route('/')
@@ -23,48 +28,60 @@ def home():
     return "Hello, Flask!"
 
 
-@app.route('/api/create_perceptron', methods=['POST'])
-def create_perceptron():
-    data = request.json
-    identifier = data.get('identifier')
-    input_size = data.get('input_size', 2)
-    learning_rate = data.get('learning_rate', 0.01)
-    epochs = data.get('epochs', 1000)
-    weights = create_and_return_perceptron(identifier, input_size, learning_rate, epochs)
-    return jsonify(weights)
+@app.route('/insert', methods=['POST'])
+def insert_data():
+    content = request.json
+    features = content['features']
+    target = content['target']
+
+    training_data['features'].append(features)
+    training_data['target'].append(target)
+
+    return jsonify({"status": "success", "message": "Data inserted successfully!"})
 
 
-@app.route('/api/train_perceptron', methods=['POST'])
-def train_perceptron_endpoint():
-    data = request.json
-    identifier = data.get('identifier')
-    training_data = np.array(data.get('training_data'))
-    labels = np.array(data.get('labels'))
-    logistic = data.get('logistic', False)
-    weights = train_perceptron(identifier, training_data, labels, logistic)
-    return jsonify(weights)
+@socketio.on('train')
+def handle_train(content):
+    model = content.get('model')
+    epochs = content.get('epochs')
+    learning_rate = content.get('learning_rate')
+    output_size = content.get('output_size')
+    inputs = np.array(training_data['features'])
+    targets = np.array(training_data['target'])
 
+    def update_callback(iteration, data):
+        update_queue.put({'iteration': iteration, 'data': data})
 
-@socketio.on('logistic_regression')
-def handle_logistic_regression(data):
-    identifier = data.get('identifier')
-    training_data = np.array(data.get('training_data'))
-    labels = np.array(data.get('labels'))
+    if model == 'rnn':
+        input_size = content.get('input_size')
+        hidden_size = content.get('hidden_size')
 
-    def update_callback(weights):
-        print(f'Putting weights in queue: {weights}')  # Debug statement
-        update_queue.put(weights)
+        rnn = RNN(input_size, hidden_size, output_size, learning_rate, update_callback)
+        rnn.train(inputs, targets, epochs)
 
-    weights = logistic_regression(identifier, training_data, labels, update_callback)
-    socketio.emit('training_complete', {'weights': weights})
+    elif model == 'cnn':
+        input_shape = content.get('input_shape')
+        num_filters = content.get('num_filters')
+        filter_size = content.get('filter_size')
+
+        cnn = CNN(input_shape, num_filters, filter_size, output_size, learning_rate, update_callback)
+        cnn.train(inputs, targets, epochs)
+
+    else:
+        input_size = content.get('input_size')
+
+        nn = NN(input_size, output_size, learning_rate, update_callback)
+        nn.train(inputs, targets, epochs)
+
+    emit('train_complete', {'message': 'Training complete!'})
 
 
 def process_updates():
     while True:
         if not update_queue.empty():
-            weights = update_queue.get()
-            print(f'Emitting weights: {weights}')  # Debug statement
-            socketio.emit('weight_update', {'weights': weights})
+            update_data = update_queue.get()
+            print(f'Emitting weights: {update_data}')  # Debug statement
+            socketio.emit('epoch_update', update_data)
         time.sleep(0.02)  # Sleep for 1 second
 
 
@@ -72,4 +89,4 @@ def process_updates():
 socketio.start_background_task(target=process_updates)
 
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, debug=True)
