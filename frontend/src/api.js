@@ -19,17 +19,13 @@ async function test() {
     }
 }
 
-async function createPerceptron(identifier, inputSize, learningRate, epochs) {
-    const url = `${baseUrl}/api/create_perceptron`;
-    const payload = {
-        identifier: identifier,
-        input_size: inputSize,
-        learning_rate: learningRate,
-        epochs: epochs
-    };
-
+async function addLayer (num_perceptrons, input_size) {
+    const url = `${baseUrl}/api/add_layer`;
     try {
-        const response = await axios.post(url, payload, {
+        const response = await axios.post(url, {
+            num_perceptrons,
+            input_size: 2,
+        }, {
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -41,20 +37,12 @@ async function createPerceptron(identifier, inputSize, learningRate, epochs) {
     }
 }
 
-async function trainPerceptron(identifier, trainingData, labels, logistic = false) {
-    const url = `${baseUrl}/api/train_perceptron`;
-    const payload = {
-        identifier: identifier,
-        training_data: trainingData,
-        labels: labels,
-        logistic: logistic
-    };
-
+async function remove_layer () {
+    const url = `${baseUrl}/api/remove_layer`;
     try {
-        const response = await axios.post(url, payload, {
+        const response = await axios.delete(url, {
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
             },
         });
         return response.data;
@@ -64,51 +52,24 @@ async function trainPerceptron(identifier, trainingData, labels, logistic = fals
     }
 }
 
-// async function createLayer(identifier, numPerceptrons, inputSize, learningRate, epochs) {
-//     const url = `${baseUrl}/api/create_layer`;
-//     const payload = {
-//         identifier: identifier,
-//         numPerceptrons: numPerceptrons,
-//         inputSize: inputSize,
-//         learningRate: learningRate,
-//         epochs: epochs
-//     };
-//
-//     try {
-//         const response = await axios.post(url, payload, {
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Access-Control-Allow-Origin': '*'
-//             },
-//         });
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error:', error.response?.data || error.message);
-//         throw new Error(error.response?.data || error.message);
-//     }
-// }
-//
-// async function trainLayer(identifier, trainingData, labels) {
-//     const url = `${baseUrl}/api/train_layer`;
-//     const payload = {
-//         identifier: identifier,
-//         trainingData: trainingData,
-//         labels: labels
-//     };
-//
-//     try {
-//         const response = await axios.post(url, payload, {
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Access-Control-Allow-Origin': '*'
-//             },
-//         });
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error:', error.response?.data || error.message);
-//         throw new Error(error.response?.data || error.message);
-//     }
-// }
+async function setTrainData (train_data, labels) {
+    const url = `${baseUrl}/api/set_train_data`;
+    try {
+        const response = await axios.post(url, {
+            X_train: train_data,
+            y_train: labels,
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error.message);
+        throw new Error(error.message);
+    }
+
+}
 
 const ApiComponent = () => {
     const [weights, setWeights] = useState([]);
@@ -131,19 +92,18 @@ const ApiComponent = () => {
         });
 
         socket.on('weight_update', (data) => {
-            console.log('Weight update:', data.weights);
-            setWeights([data.weights]);
+            console.log('Weight update:', data);
+            setWeights([data]);
         });
 
         socket.on('training_complete', (data) => {
             console.log('Training complete! Final weights:', data.weights);
-            setFinalWeights(data.weights);
+            setFinalWeights([data]);
         });
 
         socket.emit('logistic_regression', {
-            identifier: 'perceptron1',
-            training_data: [[0, 0], [0, 1], [1, 0], [1, 1]],
-            labels: [0, 0, 0, 1]
+            learning_rate: 0.1,
+            epochs: 100,
         });
 
         return () => {
@@ -161,19 +121,17 @@ const ApiComponent = () => {
                 Test
             </button>
             <button
-                onClick={() => createPerceptron('perceptron1', 2, 0.01, 1000).then(data => console.log('Created Perceptron:', data))}>
-                Create Perceptron
+                onClick={() => addLayer(2, 3)}>
+                Add Layer
             </button>
             <button
-                onClick={() => trainPerceptron('perceptron1', [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1]).then(data => console.log('Trained Perceptron:', data))}>
-                Train Perceptron
+                onClick={() => remove_layer()}>
+                Remove Layer
             </button>
-            {/*<button onClick={() => createLayer('layer1', 3, 2, 0.01, 1000).then(data => console.log('Created Layer:', data))}>*/}
-            {/*    Create Layer*/}
-            {/*</button>*/}
-            {/*<button onClick={() => trainLayer('layer1', [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1]).then(data => console.log('Trained Layer:', data))}>*/}
-            {/*    Train Layer*/}
-            {/*</button>*/}
+            <button
+                onClick={() => setTrainData([[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1])}>
+                Set Training Data
+            </button>
             <button onClick={handleLogisticRegression}>
                 Start Logistic Regression with Real-Time Updates
             </button>
