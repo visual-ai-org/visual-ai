@@ -8,6 +8,8 @@ class NN:
         self.learning_rate = learning_rate
         self.update_callback = update_callback
 
+        assert self.output_size > 0
+        assert self.input_size > 0
         # Initialize weights and biases for a simple feedforward NN
         self.weights = np.random.randn(output_size, input_size) * 0.01
         self.biases = np.zeros((output_size, 1))

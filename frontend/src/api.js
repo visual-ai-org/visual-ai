@@ -19,106 +19,31 @@ async function test() {
     }
 }
 
-async function createPerceptron(identifier, inputSize, learningRate, epochs) {
-    const url = `${baseUrl}/api/create_perceptron`;
-    const payload = {
-        identifier: identifier,
-        input_size: inputSize,
-        learning_rate: learningRate,
-        epochs: epochs
-    };
-
-    try {
-        const response = await axios.post(url, payload, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error:', error.message);
-        throw new Error(error.message);
-    }
-}
-
-async function trainPerceptron(identifier, trainingData, labels, logistic = false) {
-    const url = `${baseUrl}/api/train_perceptron`;
-    const payload = {
-        identifier: identifier,
-        training_data: trainingData,
-        labels: labels,
-        logistic: logistic
-    };
-
-    try {
-        const response = await axios.post(url, payload, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error:', error.message);
-        throw new Error(error.message);
-    }
-}
-
-// async function createLayer(identifier, numPerceptrons, inputSize, learningRate, epochs) {
-//     const url = `${baseUrl}/api/create_layer`;
-//     const payload = {
-//         identifier: identifier,
-//         numPerceptrons: numPerceptrons,
-//         inputSize: inputSize,
-//         learningRate: learningRate,
-//         epochs: epochs
-//     };
-//
-//     try {
-//         const response = await axios.post(url, payload, {
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Access-Control-Allow-Origin': '*'
-//             },
-//         });
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error:', error.response?.data || error.message);
-//         throw new Error(error.response?.data || error.message);
-//     }
-// }
-//
-// async function trainLayer(identifier, trainingData, labels) {
-//     const url = `${baseUrl}/api/train_layer`;
-//     const payload = {
-//         identifier: identifier,
-//         trainingData: trainingData,
-//         labels: labels
-//     };
-//
-//     try {
-//         const response = await axios.post(url, payload, {
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Access-Control-Allow-Origin': '*'
-//             },
-//         });
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error:', error.response?.data || error.message);
-//         throw new Error(error.response?.data || error.message);
-//     }
-// }
-
 const ApiComponent = () => {
-    const [weights, setWeights] = useState([]);
-    const [finalWeights, setFinalWeights] = useState(null);
+    const [trainingMessage, setTrainingMessage] = useState('');
+    const [trainingUpdates, setTrainingUpdates] = useState([]);
+    const [features, setFeatures] = useState('0,0,0,0,0,0,0');
+    const [target, setTarget] = useState();
+    const [message, setMessage] = useState('');
 
-    useEffect(() => {
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const featuresArray = features.split(',').map(Number);
 
-    }, []);
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/insert', {
+                features: featuresArray,
+                target: Number(target)
+            });
+            setMessage(response.data.message);
+        } catch (error) {
+            console.error(error);
+            setMessage('Error inserting data.');
+        }
+    };
 
-    const handleLogisticRegression = () => {
+    const handleTrain = () => {
+        setTrainingUpdates([]);
         const socket = socket_io("localhost:5000/", {
             transports: ["websocket"],
             cors: {
@@ -128,65 +53,76 @@ const ApiComponent = () => {
 
         socket.on('connect', () => {
             console.log('Connected to server');
+
+            socket.emit('train', {
+                model: 'nn',
+                epochs: 5,
+                learning_rate: 0.01,
+                // input_size: 5,
+                // output_size: 1,
+            });
         });
 
-        socket.on('weight_update', (data) => {
-            console.log('Weight update:', data.weights);
-            setWeights([data.weights]);
+        socket.on('train_update', (data) => {
+            console.log('train_update:', data);
+            setTrainingUpdates([data]);
         });
 
         socket.on('training_complete', (data) => {
-            console.log('Training complete! Final weights:', data.weights);
-            setFinalWeights(data.weights);
-        });
-
-        socket.emit('logistic_regression', {
-            identifier: 'perceptron1',
-            training_data: [[0, 0], [0, 1], [1, 0], [1, 1]],
-            labels: [0, 0, 0, 1]
-        });
-
-        return () => {
+            console.log('Training complete! Final: ', data);
+            setTrainingMessage(data.message);
             socket.disconnect();
-            console.log('Disconnected from server');
-        };
+        });
 
+        socket.on('error', (error) => {
+            console.error('Error:', error.message);
+        });
     };
 
     return (
         <div>
-            <h1>API Interaction Example</h1>
+            <h1>Insert Data</h1>
             <button
                 onClick={() => test()}>
                 Test
             </button>
-            <button
-                onClick={() => createPerceptron('perceptron1', 2, 0.01, 1000).then(data => console.log('Created Perceptron:', data))}>
-                Create Perceptron
-            </button>
-            <button
-                onClick={() => trainPerceptron('perceptron1', [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1]).then(data => console.log('Trained Perceptron:', data))}>
-                Train Perceptron
-            </button>
-            {/*<button onClick={() => createLayer('layer1', 3, 2, 0.01, 1000).then(data => console.log('Created Layer:', data))}>*/}
-            {/*    Create Layer*/}
-            {/*</button>*/}
-            {/*<button onClick={() => trainLayer('layer1', [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1]).then(data => console.log('Trained Layer:', data))}>*/}
-            {/*    Train Layer*/}
-            {/*</button>*/}
-            <button onClick={handleLogisticRegression}>
-                Start Logistic Regression with Real-Time Updates
-            </button>
-            <div>
-                <h2>Weights Updates</h2>
-                <pre>{JSON.stringify(weights, null, 2)}</pre>
-                {finalWeights && (
-                    <div>
-                        <h2>Final Weights</h2>
-                        <pre>{JSON.stringify(finalWeights, null, 2)}</pre>
-                    </div>
-                )}
-            </div>
+            <form onSubmit={handleSubmit}>
+                <label>
+                    Features (comma-separated):
+                    <input
+                        type="text"
+                        value={features}
+                        onChange={(e) => setFeatures(e.target.value)}
+                    />
+                </label>
+                <br/>
+                <label>
+                    Target:
+                    <input
+                        type="text"
+                        value={target}
+                        onChange={(e) => setTarget(e.target.value)}
+                    />
+                </label>
+                <br/>
+                <button type="submit">Submit</button>
+            </form>
+            {message && <p>{message}</p>}
+            <h1>Train Model</h1>
+            <button onClick={handleTrain}>Start Training</button>
+            {trainingMessage && <p>{trainingMessage}</p>}
+            <h2>Training Updates</h2>
+            <ul>
+                {trainingUpdates.map((update, index) => (
+                    <li key={index}>
+                        Epoch {update.iteration + 1}:
+                        <ul>
+                            <li>Weights: {update.data.weights[0].join(', ')}</li>
+                            <li>Biases: {update.data.biases[0].join(', ')}</li>
+                        </ul>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 };
