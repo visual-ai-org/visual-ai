@@ -8,7 +8,8 @@ class MLPTrainer:
         error_log = []
         for epoch in range(self.epochs):
             for inputs, label in zip(X_train, y_train):
-                activations = mlp.forward(inputs)
+                print("inputs on train", inputs.reshape(-1, 1))
+                activations = mlp.forward(inputs.reshape(-1, 1))
                 error = mlp.backward(activations, label, self.learning_rate)
                 error_log.append(error)
                 if self.update_callback:
