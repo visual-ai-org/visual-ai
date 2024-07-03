@@ -1,6 +1,8 @@
 # Multi-Layer Perceptron Class
 import json
 
+import numpy as np
+
 from .layer import Layer
 
 
@@ -11,12 +13,21 @@ class MLP:
     def add_layer(self, num_perceptrons, input_size=None):
         if self.layers:
             input_size = len(self.layers[-1].perceptrons)
+        print("input size", input_size)
         self.layers.append(Layer(num_perceptrons, input_size))
 
     def forward(self, inputs):
+        activations = [inputs]
         for layer in self.layers:
             inputs = layer.forward(inputs)
-        return inputs
+            activations.append(inputs)
+        return activations
+
+    def backward(self, activations, label, learning_rate):
+        errors = label - activations[-1]
+        for i in range(len(self.layers) - 1, -1, -1):
+            self.layers[i].backward(errors, activations[i], learning_rate)
+        return np.mean(np.square(label - activations[-1]))
 
     def get_model_weights(self):
         weights = []

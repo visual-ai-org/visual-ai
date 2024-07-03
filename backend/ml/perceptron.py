@@ -11,12 +11,21 @@ class Perceptron:
         return 1 / (1 + np.exp(-x))
 
     def predict(self, inputs):
-        # print(inputs, self.weights)
-        # ensure dimensions are compatible
-        if len(inputs) != len(self.weights):
-            raise ValueError("Input size does not match weight size")
+        print(self.weights.shape)
+        print("inputs", inputs, "weights", self.weights, "bias", self.bias)
 
         return self.activate(np.dot(inputs.T, self.weights) + self.bias)
 
     def get_weights(self):
         return self.weights, self.bias
+
+    def update(self, inputs, delta, learning_rate):
+        print("weights:", self.weights)
+        print("lr:", (learning_rate * delta * inputs))
+        self.weights = self.weights + (learning_rate * delta * inputs)
+        print("weights new:", self.weights)
+
+    # print("bias:", self.bias)
+        # print("lr:", (learning_rate * delta).reshape(-1, 1).T)
+        self.bias = self.bias @ (learning_rate * delta).reshape(-1, 1).T
+        # print("new bias:", self.bias)

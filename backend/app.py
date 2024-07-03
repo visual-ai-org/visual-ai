@@ -2,6 +2,7 @@ import json
 
 import eventlet
 
+from ml.train import MLPTrainer
 from ml import mlp
 from ml.logistic_reg import LogisticRegression
 
@@ -70,8 +71,8 @@ def handle_logistic_regression(data):
         print(f'Putting weights in queue: {weights}')  # Debug statement
         update_queue.put(weights)
 
-    lr = LogisticRegression(learning_rate, epochs, update_callback)
-    lr.train(mlp, X_train, y_train)
+    trainer = MLPTrainer(learning_rate, epochs, update_callback)
+    trainer.train(mlp, X_train, y_train)
     weights = mlp.get_model_weights()
 
     socketio.emit('training_complete', {'weights': weights})
