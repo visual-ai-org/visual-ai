@@ -102,7 +102,7 @@ const ApiComponent = () => {
         });
 
         socket.emit('logistic_regression', {
-            learning_rate: 0.1,
+            learning_rate: 0.001,
             epochs: 100,
         });
 
