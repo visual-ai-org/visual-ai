@@ -14,8 +14,8 @@ async function test() {
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error.message);
-        throw new Error(error.message);
+        console.error('Error:', error.response ? error.response.data : error.message);
+        throw new Error(error.response ? error.response.data : error.message);
     }
 }
 
@@ -23,8 +23,8 @@ async function addLayer (num_perceptrons, input_size) {
     const url = `${baseUrl}/api/add_layer`;
     try {
         const response = await axios.post(url, {
-            num_perceptrons,
-            input_size: 2,
+            num_perceptrons: num_perceptrons,
+            input_size: input_size,
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -32,8 +32,8 @@ async function addLayer (num_perceptrons, input_size) {
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error.message);
-        throw new Error(error.message);
+        console.error('Error:', error.response ? error.response.data : error.message);
+        throw new Error(error.response ? error.response.data : error.message);
     }
 }
 
@@ -47,8 +47,8 @@ async function remove_layer () {
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error.message);
-        throw new Error(error.message);
+        console.error('Error:', error.response ? error.response.data : error.message);
+        throw new Error(error.response ? error.response.data : error.message);
     }
 }
 
@@ -65,8 +65,8 @@ async function setTrainData (train_data, labels) {
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error.message);
-        throw new Error(error.message);
+        console.error('Error:', error.response ? error.response.data : error.message);
+        throw new Error(error.response ? error.response.data : error.message);
     }
 
 }
@@ -121,7 +121,11 @@ const ApiComponent = () => {
                 Test
             </button>
             <button
-                onClick={() => addLayer(2, 3)}>
+                onClick={() => {
+                    addLayer(5, 3)
+                    addLayer(3)
+                    addLayer(1)
+                }}>
                 Add Layer
             </button>
             <button
@@ -129,7 +133,7 @@ const ApiComponent = () => {
                 Remove Layer
             </button>
             <button
-                onClick={() => setTrainData([[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 0, 1])}>
+                onClick={() => setTrainData([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]], [1, 0, 1])}>
                 Set Training Data
             </button>
             <button onClick={handleLogisticRegression}>

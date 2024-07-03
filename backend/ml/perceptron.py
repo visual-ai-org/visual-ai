@@ -11,7 +11,12 @@ class Perceptron:
         return 1 / (1 + np.exp(-x))
 
     def predict(self, inputs):
-        return self.activate(np.dot(inputs, self.weights) + self.bias)
+        # print(inputs, self.weights)
+        # ensure dimensions are compatible
+        if len(inputs) != len(self.weights):
+            raise ValueError("Input size does not match weight size")
+
+        return self.activate(np.dot(inputs.T, self.weights) + self.bias)
 
     def get_weights(self):
         return self.weights, self.bias

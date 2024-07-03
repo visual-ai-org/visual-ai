@@ -22,14 +22,17 @@ class MLP:
         weights = []
         for i, layer in enumerate(self.layers):
             layer_weights = layer.get_weights()
+            # Convert numpy arrays to lists
+            serializable_layer_weights = [(w.tolist(), b.tolist()) for w, b in layer_weights]
             weights.append({
                 "layer": i + 1,
-                "perceptrons": layer_weights
+                "perceptrons": serializable_layer_weights
             })
         return weights
 
-    def get_layers(self):
-        return json.dumps([layer.__dict__ for layer in self.layers])
+    def get_model_weights_json(self):
+        print(self.get_model_weights())
+        return json.dumps(self.get_model_weights(), indent=4)
 
     def remove_layer(self):
         self.layers.pop()

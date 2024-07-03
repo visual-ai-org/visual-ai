@@ -1,3 +1,5 @@
+import json
+
 import eventlet
 
 from ml import mlp
@@ -31,21 +33,29 @@ def home():
 @app.route('/api/add_layer', methods=['POST'])
 def add_layer():
     data = request.json
-    num_perceptrons = data['num_perceptrons']
-    input_size = data.get('input_size', None)
-    mlp.add_layer(num_perceptrons, input_size)
-    return jsonify({"message": mlp.get_layers()}), 200
+    try:
+        num_perceptrons = data['num_perceptrons']
+        input_size = data.get('input_size', None)
+        mlp.add_layer(num_perceptrons, input_size)
+        weights = mlp.get_model_weights_json()
+    except Exception as e:
+        print(e)
+        return jsonify({"message": str(e)}), 400
+
+    return jsonify({"message": "Layer added successfully", "weights": weights}), 200
 
 
 @app.route('/api/remove_layer', methods=['DELETE'])
 def remove_layer():
     mlp.remove_layer()
-    return jsonify({"message": mlp.get_layers()}), 200
+    return jsonify({"message": "Layer removed successfully", "weights": mlp.get_model_weights_json()}), 200
 
 
 @app.route('/api/set_train_data', methods=['POST'])
 def set_train_data():
     data = request.json
+    # set global X_train and y_train
+    global X_train, y_train
     X_train = np.array(data['X_train'])
     y_train = np.array(data['y_train'])
     return jsonify({"message": f'{X_train}, {y_train}'}), 200
