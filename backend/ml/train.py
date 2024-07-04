@@ -16,7 +16,7 @@ class Train:
             if self.update_callback:
                 data = {
                     "type": "loss",
-                    "epoch": epoch,
+                    "epoch": epoch+1,
                     "max_epoch": epochs,
                     "loss": self.mlp.get_loss(X_train, y_train)
                 }

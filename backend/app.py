@@ -22,9 +22,8 @@ socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 update_queue = Queue()
 mlp = mlp.Mlp(init_nodes=2, learning_rate=0.2)
-X_train = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-y_train = np.array([0, 1, 1, 0])
-
+X_train = []
+y_train = []
 
 @app.route('/')
 def home():
@@ -44,6 +43,19 @@ def add_layer():
         return jsonify({"message": str(e)}), 400
 
     return jsonify({"message": "Layer added successfully", "weights": weights}), 200
+
+
+@app.route('/api/set_input_size', methods=['POST'])
+def set_input_size():
+    data = request.json
+    try:
+        size = data['size']
+        mlp.input_size = size
+    except Exception as e:
+        print(e)
+        return jsonify({"message": str(e)}), 400
+
+    return jsonify({"message": "Input size set successfully"}), 200
 
 
 # @app.route('/api/remove_layer', methods=['DELETE'])
@@ -85,10 +97,10 @@ def process_updates():
             data = update_queue.get()
 
             if data['type'] == 'weights':
-                # print(f'Emitting Weights: {data}')
+                print(f'Emitting Weights: {data}')
                 socketio.emit('weight_update', {'data': data})
             elif data['type'] == "loss":
-                # print(f'Emitting Loss: {data}')
+                print(f'Emitting Loss: {data}')
                 socketio.emit('loss_update', {'data': data})
         time.sleep(0.02)  # Sleep for 1 second
 

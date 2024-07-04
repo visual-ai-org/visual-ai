@@ -19,12 +19,11 @@ async function test() {
     }
 }
 
-async function addLayer (num_perceptrons, input_size) {
-    const url = `${baseUrl}/api/add_layer`;
+async function setInputSize (size) {
+    const url = `${baseUrl}/api/set_input_size`;
     try {
         const response = await axios.post(url, {
-            num_perceptrons: num_perceptrons,
-            input_size: input_size,
+            size: size,
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -37,10 +36,13 @@ async function addLayer (num_perceptrons, input_size) {
     }
 }
 
-async function remove_layer () {
-    const url = `${baseUrl}/api/remove_layer`;
+async function addLayer (num_perceptrons, func) {
+    const url = `${baseUrl}/api/add_layer`;
     try {
-        const response = await axios.delete(url, {
+        const response = await axios.post(url, {
+            size: num_perceptrons,
+            function: func,
+        }, {
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -51,6 +53,21 @@ async function remove_layer () {
         throw new Error(error.response ? error.response.data : error.message);
     }
 }
+
+// async function remove_layer () {
+//     const url = `${baseUrl}/api/remove_layer`;
+//     try {
+//         const response = await axios.delete(url, {
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//         });
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error:', error.response ? error.response.data : error.message);
+//         throw new Error(error.response ? error.response.data : error.message);
+//     }
+// }
 
 async function setTrainData (train_data, labels) {
     const url = `${baseUrl}/api/set_train_data`;
@@ -73,7 +90,7 @@ async function setTrainData (train_data, labels) {
 
 const ApiComponent = () => {
     const [weights, setWeights] = useState([]);
-    const [finalWeights, setFinalWeights] = useState(null);
+    const [epoch, setEpoch] = useState([])
 
     useEffect(() => {
 
@@ -96,21 +113,24 @@ const ApiComponent = () => {
             setWeights([data]);
         });
 
+        socket.on('loss_update', (data) => {
+            console.log('Loss update:', data)
+            setEpoch([data])
+        })
+
         socket.on('training_complete', (data) => {
-            console.log('Training complete! Final weights:', data.weights);
-            setFinalWeights([data]);
+            console.log('Training complete!');
         });
 
         socket.emit('train', {
-            learning_rate: 0.001,
+            learning_rate: 0.02,
             epochs: 100,
         });
 
         return () => {
             socket.disconnect();
             console.log('Disconnected from server');
-        };
-
+        }
     };
 
     return (
@@ -122,18 +142,18 @@ const ApiComponent = () => {
             </button>
             <button
                 onClick={() => {
-                    addLayer(5, 3)
-                    addLayer(3)
-                    addLayer(1)
+                    setInputSize(2)
+                    addLayer(2, "sigmoid")
+                    addLayer(1, "sigmoid")
                 }}>
                 Add Layer
             </button>
+            {/*<button*/}
+            {/*    onClick={() => remove_layer()}>*/}
+            {/*    Remove Layer*/}
+            {/*</button>*/}
             <button
-                onClick={() => remove_layer()}>
-                Remove Layer
-            </button>
-            <button
-                onClick={() => setTrainData([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]], [1, 0, 1])}>
+                onClick={() => setTrainData([[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]])}>
                 Set Training Data
             </button>
             <button onClick={handleLogisticRegression}>
@@ -141,13 +161,8 @@ const ApiComponent = () => {
             </button>
             <div>
                 <h2>Weights Updates</h2>
+                <pre>{JSON.stringify(epoch, null, 2)}</pre>
                 <pre>{JSON.stringify(weights, null, 2)}</pre>
-                {finalWeights && (
-                    <div>
-                        <h2>Final Weights</h2>
-                        <pre>{JSON.stringify(finalWeights, null, 2)}</pre>
-                    </div>
-                )}
             </div>
         </div>
     );
