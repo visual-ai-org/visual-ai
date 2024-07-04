@@ -68,7 +68,7 @@ class TestAPI(unittest.TestCase):
         # Test logistic regression with SocketIO
         logistic_payload = {
             "learning_rate": 0.02,
-            "epochs": 10000,
+            "epochs": 100,
         }
         self.socketio.emit('train', logistic_payload)
 
@@ -76,9 +76,11 @@ class TestAPI(unittest.TestCase):
         eventlet.sleep(1)
 
         received = self.socketio.get_received()
-        weight_updates = [msg['args'][0]['weights'] for msg in received if msg['name'] == 'weight_update']
+        weight_updates = [msg['args'][0]['data'] for msg in received if msg['name'] == 'weight_update']
 
         self.assertGreater(len(weight_updates), 0)  # Ensure we received updates
+        # assert training complete is received
+        self.assertTrue(any(msg['name'] == 'training_complete' for msg in received))
 
 if __name__ == '__main__':
     unittest.main()

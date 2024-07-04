@@ -30,6 +30,18 @@ class Mlp:
             model_weights[f'layer {i}'] = layer_weights
         return model_weights
 
+    def get_model_weights_json(self):
+        model_weights = {}
+        for i, layer in enumerate(self.layers):
+            layer_weights = {}
+            for j, perceptron in enumerate(layer.perceptrons):
+                layer_weights[f'perceptron {j}'] = {
+                    'weights': perceptron.weights.tolist(),
+                    'bias': perceptron.bias  # Convert to scalar for JSON serialization
+                }
+            model_weights[f'layer {i}'] = layer_weights
+        return model_weights
+
     def get_loss(self, X, y):
         total_loss = 0
         for inp, target in zip(X, y):

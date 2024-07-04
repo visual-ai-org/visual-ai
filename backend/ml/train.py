@@ -43,7 +43,7 @@ class Train:
                 if self.update_callback:
                     data = {
                         "type": "weights",
-                        "weights": self.mlp.get_model_weights()
+                        "weights": self.mlp.get_model_weights_json()
                     }
                     self.update_callback(data)
 

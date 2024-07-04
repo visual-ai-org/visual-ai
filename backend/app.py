@@ -38,7 +38,7 @@ def add_layer():
         size = data['size']
         function = data['function']
         mlp.add_layer(size, function=function)
-        weights = mlp.get_model_weights()
+        weights = mlp.get_model_weights_json()
     except Exception as e:
         print(e)
         return jsonify({"message": str(e)}), 400
@@ -85,10 +85,10 @@ def process_updates():
             data = update_queue.get()
 
             if data['type'] == 'weights':
-                print(f'Emitting Weights: {data}')
+                # print(f'Emitting Weights: {data}')
                 socketio.emit('weight_update', {'data': data})
             elif data['type'] == "loss":
-                print(f'Emitting Loss: {data}')
+                # print(f'Emitting Loss: {data}')
                 socketio.emit('loss_update', {'data': data})
         time.sleep(0.02)  # Sleep for 1 second
 
