@@ -19,6 +19,7 @@ class MLP:
     def forward(self, inputs):
         # print("inputs", inputs)
         # reshape input to 3d
+
         activations = [inputs]
         print("inputs reshaped", activations)
         for layer in self.layers:

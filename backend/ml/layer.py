@@ -12,9 +12,12 @@ class Layer:
         return np.array([perceptron.predict(inputs) for perceptron in self.perceptrons])
 
     def backward(self, errors, previous_activations, learning_rate):
-        print("errors:", errors, errors.shape)
-        print("prev activations:", previous_activations, previous_activations.shape)
-        deltas = (errors @ previous_activations.T) @ (1 - previous_activations)  # Sigmoid derivative
+        print("prev activations:", previous_activations.shape)
+        print("errors:", errors.shape)
+        print("previous_activations @ errors", (previous_activations @ errors).shape)
+        print("1 - previous_activations", (1 - previous_activations).shape)
+
+        deltas = previous_activations @ errors @ (1 - previous_activations).T  # Sigmoid derivative
         # print("deltas", deltas)
         # print(len(self.perceptrons))
         for i, perceptron in enumerate(self.perceptrons):

@@ -4,7 +4,6 @@ import eventlet
 
 from ml.train import MLPTrainer
 from ml import mlp
-from ml.logistic_reg import LogisticRegression
 
 eventlet.monkey_patch()  # This must be the very first import
 
@@ -62,8 +61,8 @@ def set_train_data():
     return jsonify({"message": f'{X_train}, {y_train}'}), 200
 
 
-@socketio.on('logistic_regression')
-def handle_logistic_regression(data):
+@socketio.on('train')
+def handle_train(data):
     learning_rate = data.get('learning_rate', 0.01)
     epochs = data.get('epochs', 1000)
 

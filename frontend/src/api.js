@@ -101,7 +101,7 @@ const ApiComponent = () => {
             setFinalWeights([data]);
         });
 
-        socket.emit('logistic_regression', {
+        socket.emit('train', {
             learning_rate: 0.001,
             epochs: 100,
         });
