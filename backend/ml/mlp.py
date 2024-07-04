@@ -1,54 +1,51 @@
 # Multi-Layer Perceptron Class
 import json
+import operator
 
 import numpy as np
 
 from .layer import Layer
 
 
-class MLP:
-    def __init__(self):
+class Mlp:
+    def __init__(self, init_nodes: int = 0, learning_rate: float = .2) -> None:
         self.layers = []
+        self.learning_rate = learning_rate
+        if init_nodes > 0:
+            self.input_size = init_nodes
 
-    def add_layer(self, num_perceptrons, input_size=None):
-        if self.layers:
-            input_size = len(self.layers[-1].perceptrons)
-        print("input size", input_size)
-        self.layers.append(Layer(num_perceptrons, input_size))
-
-    def forward(self, inputs):
-        # print("inputs", inputs)
-        # reshape input to 3d
-
-        activations = [inputs]
-        print("inputs reshaped", activations)
-        for layer in self.layers:
-            inputs = layer.forward(inputs)
-            activations.append(inputs)
-        return activations
-
-    def backward(self, activations, label, learning_rate):
-        print("activations", activations)
-        errors = label - activations[-1]
-        for i in range(len(self.layers) - 1, -1, -1):
-            self.layers[i].backward(errors, activations[i], learning_rate)
-        return np.mean(np.square(label - activations[-1]))
+    def add_layer(self, number_of_nodes: int, function="sigmoid"):
+        input_size = self.layers[-1].perceptrons[0].weights.size if self.layers else self.input_size
+        self.layers.append(Layer(number_of_nodes, input_size, function))
 
     def get_model_weights(self):
-        weights = []
+        model_weights = {}
         for i, layer in enumerate(self.layers):
-            layer_weights = layer.get_weights()
-            # Convert numpy arrays to lists
-            serializable_layer_weights = [(w.tolist(), b.tolist()) for w, b in layer_weights]
-            weights.append({
-                "layer": i + 1,
-                "perceptrons": serializable_layer_weights
-            })
-        return weights
+            layer_weights = {}
+            for j, perceptron in enumerate(layer.perceptrons):
+                layer_weights[f'perceptron {j}'] = {
+                    'weights': perceptron.weights.copy(),
+                    'bias': perceptron.bias
+                }
+            model_weights[f'layer {i}'] = layer_weights
+        return model_weights
 
-    def get_model_weights_json(self):
-        print(self.get_model_weights())
-        return json.dumps(self.get_model_weights(), indent=4)
+    def get_loss(self, X, y):
+        total_loss = 0
+        for inp, target in zip(X, y):
+            predicted = self.feed_forward(inp)[-1]
+            total_loss += np.mean((target - predicted) ** 2)
+        return total_loss / len(X)
 
-    def remove_layer(self):
-        self.layers.pop()
+    def feed_forward(self, inp):
+        outputs = [np.array(inp)]
+        for layer in self.layers:
+            outputs.append(layer.forward(outputs[-1]))
+        return outputs
+
+    def predict(self, inp):
+        output = self.feed_forward(inp)[-1]
+        output = dict(enumerate(output))
+        out_class = max(output.items(), key=operator.itemgetter(1))[0]
+        out_prob = output[out_class]
+        return out_class, out_prob

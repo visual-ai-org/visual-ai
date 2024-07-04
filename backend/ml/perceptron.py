@@ -2,32 +2,37 @@ import math
 
 import numpy as np
 
-
-# Perceptron Class
 class Perceptron:
-    def __init__(self, input_size):
-        self.weights = np.random.rand(input_size)
-        self.bias = np.random.rand(1)
+    def __init__(self, input_size: int, function: str = "sigmoid"):
+        self.weights = np.random.randn(input_size) * np.sqrt(2 / input_size)
+        self.bias = np.random.uniform(0, 0)
+        self.function = function
 
-    def activate(self, x):
+    @staticmethod
+    def soft_plus(x):
+        return np.log(1 + np.exp(x))
+
+    @staticmethod
+    def relu(x):
+        return np.maximum(0, x)
+
+    @staticmethod
+    def sigmoid(x):
         return 1 / (1 + np.exp(-x))
 
-    def predict(self, inputs):
-        # print(self.weights.shape)
-        print()
-        print("weights", self.weights.shape)
-        print("inputs", inputs.shape)
+    @staticmethod
+    def squash(x, function):
+        if function == "sigmoid":
+            return Perceptron.sigmoid(x)
+        elif function == "soft_plus":
+            return Perceptron.soft_plus(x)
+        elif function == "relu":
+            return Perceptron.relu(x)
 
-        print("np.dot", np.dot(self.weights, np.squeeze(inputs)).shape)
-        print("bias", self.bias.shape)
+    def activate(self, x):
+        z = np.dot(self.weights, x) + self.bias
+        return Perceptron.squash(z, self.function)
 
-
-        return self.activate(np.dot(self.weights, np.squeeze(inputs)) + self.bias)
-
-    def get_weights(self):
-        return self.weights, self.bias
-
-    def update(self, inputs, delta, learning_rate):
-        self.weights = self.weights @ (learning_rate * delta * inputs)
-        self.bias = self.bias + (learning_rate * delta)
-        print("Bias update:", self.bias.shape)
+    def update_weights(self, delta_w, delta_b):
+        self.weights += delta_w
+        self.bias += delta_b

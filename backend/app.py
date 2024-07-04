@@ -2,8 +2,9 @@ import json
 
 import eventlet
 
-from ml.train import MLPTrainer
+from backend.ml.mlp import Mlp
 from ml import mlp
+from ml.train import Train
 
 eventlet.monkey_patch()  # This must be the very first import
 
@@ -20,7 +21,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 update_queue = Queue()
-mlp = mlp.MLP()
+mlp = mlp.Mlp(init_nodes=2, learning_rate=0.2)
 X_train = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
 y_train = np.array([0, 1, 1, 0])
 
@@ -34,10 +35,10 @@ def home():
 def add_layer():
     data = request.json
     try:
-        num_perceptrons = data['num_perceptrons']
-        input_size = data.get('input_size', None)
-        mlp.add_layer(num_perceptrons, input_size)
-        weights = mlp.get_model_weights_json()
+        size = data['size']
+        function = data['function']
+        mlp.add_layer(size, function=function)
+        weights = mlp.get_model_weights()
     except Exception as e:
         print(e)
         return jsonify({"message": str(e)}), 400
@@ -45,10 +46,10 @@ def add_layer():
     return jsonify({"message": "Layer added successfully", "weights": weights}), 200
 
 
-@app.route('/api/remove_layer', methods=['DELETE'])
-def remove_layer():
-    mlp.remove_layer()
-    return jsonify({"message": "Layer removed successfully", "weights": mlp.get_model_weights_json()}), 200
+# @app.route('/api/remove_layer', methods=['DELETE'])
+# def remove_layer():
+#     mlp.remove_layer()
+#     return jsonify({"message": "Layer removed successfully", "weights": mlp.get_model_weights_json()}), 200
 
 
 @app.route('/api/set_train_data', methods=['POST'])
@@ -66,23 +67,29 @@ def handle_train(data):
     learning_rate = data.get('learning_rate', 0.01)
     epochs = data.get('epochs', 1000)
 
-    def update_callback(weights):
-        print(f'Putting weights in queue: {weights}')  # Debug statement
-        update_queue.put(weights)
+    mlp.learning_rate = learning_rate
 
-    trainer = MLPTrainer(learning_rate, epochs, update_callback)
-    trainer.train(mlp, X_train, y_train)
-    weights = mlp.get_model_weights()
+    def update_callback(data):
+        print(f'Putting weights in queue: {data}')  # Debug statement
+        update_queue.put(data)
 
-    socketio.emit('training_complete', {'weights': weights})
+    trainer = Train(mlp, update_callback)
+    trainer.train(X_train, y_train, epochs)
+
+    socketio.emit('training_complete')
 
 
 def process_updates():
     while True:
         if not update_queue.empty():
-            weights = update_queue.get()
-            print(f'Emitting weights: {weights}')  # Debug statement
-            socketio.emit('weight_update', {'weights': weights})
+            data = update_queue.get()
+
+            if data['type'] == 'weights':
+                print(f'Emitting Weights: {data}')
+                socketio.emit('weight_update', {'data': data})
+            elif data['type'] == "loss":
+                print(f'Emitting Loss: {data}')
+                socketio.emit('loss_update', {'data': data})
         time.sleep(0.02)  # Sleep for 1 second
 
 

@@ -5,23 +5,18 @@ from .perceptron import Perceptron
 
 
 class Layer:
-    def __init__(self, num_perceptrons, input_size):
-        self.perceptrons = [Perceptron(input_size) for _ in range(num_perceptrons)]
+    def __init__(self, number_of_nodes: int, input_size: int, function: str = "sigmoid"):
+        self.perceptrons = [Perceptron(input_size, function) for _ in range(number_of_nodes)]
 
-    def forward(self, inputs):
-        return np.array([perceptron.predict(inputs) for perceptron in self.perceptrons])
+    @staticmethod
+    def derivative(x, function):
+        if function == "sigmoid":
+            return x * (1 - x)
+        elif function == "soft_plus":
+            return Perceptron.sigmoid(x)
+        elif function == "relu":
+            return np.where(x > 0, 1, 0)
 
-    def backward(self, errors, previous_activations, learning_rate):
-        print("prev activations:", previous_activations.shape)
-        print("errors:", errors.shape)
-        print("previous_activations @ errors", (previous_activations @ errors).shape)
-        print("1 - previous_activations", (1 - previous_activations).shape)
+    def forward(self, x):
+        return np.array([p.activate(x) for p in self.perceptrons])
 
-        deltas = previous_activations @ errors @ (1 - previous_activations).T  # Sigmoid derivative
-        # print("deltas", deltas)
-        # print(len(self.perceptrons))
-        for i, perceptron in enumerate(self.perceptrons):
-            perceptron.update(previous_activations, deltas[i % len(deltas)], learning_rate)
-
-    def get_weights(self):
-        return [perceptron.get_weights() for perceptron in self.perceptrons]

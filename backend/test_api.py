@@ -48,30 +48,27 @@ class TestAPI(unittest.TestCase):
     def test_logistic_regression(self):
         create_url = '/api/add_layer'
         create_payload = {
-            "num_perceptrons": 5,
-            "input_size": 3,
+            "size": 2,
+            "function": "sigmoid",
         }
         self.app.post(create_url, data=json.dumps(create_payload), content_type='application/json')
         create_payload = {
-            "num_perceptrons": 3,
-        }
-        self.app.post(create_url, data=json.dumps(create_payload), content_type='application/json')
-        create_payload = {
-            "num_perceptrons": 1,
+            "size": 1,
+            "function": "sigmoid"
         }
         self.app.post(create_url, data=json.dumps(create_payload), content_type='application/json')
 
         set_data = '/api/set_train_data'
         data_payload = {
-            "X_train": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
-            "y_train": [1, 0, 1],
+            "X_train": [[0, 0], [0, 1], [1, 0], [1, 1]],
+            "y_train": [[0], [1], [1], [0]],
         }
         self.app.post(set_data, data=json.dumps(data_payload), content_type='application/json')
 
         # Test logistic regression with SocketIO
         logistic_payload = {
-            "learning_rate": 0.001,
-            "epochs": 100,
+            "learning_rate": 0.02,
+            "epochs": 10000,
         }
         self.socketio.emit('train', logistic_payload)
 
@@ -80,10 +77,8 @@ class TestAPI(unittest.TestCase):
 
         received = self.socketio.get_received()
         weight_updates = [msg['args'][0]['weights'] for msg in received if msg['name'] == 'weight_update']
-        training_complete = [msg['args'][0]['weights'] for msg in received if msg['name'] == 'training_complete']
 
         self.assertGreater(len(weight_updates), 0)  # Ensure we received updates
-        self.assertIsInstance(training_complete[0], list)  # Check final weights format
 
 if __name__ == '__main__':
     unittest.main()
