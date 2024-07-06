@@ -89,7 +89,7 @@ export default function ControlPanel({handleTraining}) {
         <Divider />
         <List>
           {Array.from({ length: layers }, (_, index) => (
-            <Layer index={index}> </Layer>
+            <Layer index={index} lastIndex={layers - 1}> </Layer>
           ))}
         </List>
       </DialogContent>
