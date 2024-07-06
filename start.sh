@@ -20,7 +20,7 @@ export EVENTLET_HUB=poll
 
 # Start the backend (Python Flask) with eventlet
 cd ../backend || exit
-python app.py &
+python3 app.py &
 backend_pid=$!
 
 # Wait for both processes to complete
