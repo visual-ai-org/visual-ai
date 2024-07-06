@@ -38,7 +38,7 @@ const resetBackend = async () => {
 }
 
 const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] => {
-  return edges.map(edge => {
+  const newEdges = edges.map(edge => {
     const sourceLayer = Number(edge.sourceLayer);
     const targetLayer = Number(edge.targetLayer);
     const sourceIndex = edge.sourceIndex;
@@ -61,8 +61,8 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
 
       // Check if the weight index is valid
       if (weightIndex >= 0 && weightIndex < perceptronWeights.length) {
-        const weightValue = perceptronWeights[weightIndex];
-        return { ...edge, value: weightValue };
+        edge.value = perceptronWeights[weightIndex];
+        console.log(`Updated edge value to ${edge.value}`)
       } else {
         console.error(`Invalid weight index: ${weightIndex} for sourceLayer ${sourceLayer}, targetLayer ${targetLayer}`);
       }
@@ -70,9 +70,10 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
       console.error(`Invalid keys: sourceLayerKey = ${sourceLayerKey}, targetLayerKey = ${targetLayerKey}, perceptronKey = ${perceptronKey}`);
     }
 
-    // Return edge with default value if there was an error
-    return { ...edge, value: 0 };
+    return { ...edge};
   });
+  console.log("newEdges", newEdges)
+  return newEdges;
 };
 
 export default function Network({
@@ -144,14 +145,17 @@ export default function Network({
   useEffect(() => {
     resetBackend().then(r =>
         setBackend(layerPerceptronMap).then(
-            r => setEdges(updateEdgeValue(edges, r.weights))
+            r => {
+              setEdges(updateEdgeValue(edges, r.weights))
+            }
         )
     )
-  }, [layerPerceptronMap]);
+  }, [nodes]);
 
   useEffect(() => {
+    console.log("edges", edges)
     setGraph({nodes: nodes, links: edges});
-  }, [layerPerceptronMap, nodes]);
+  }, [edges]);
 
   return width < 10 ? null : (
     <svg width={width} height={height}>
