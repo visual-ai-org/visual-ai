@@ -9,8 +9,8 @@ const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   }
 }
 
-const resetBackend = async (layerPerceptronMap: Map<number, number>) => {
-  for (let i = 0; i < 5; i++) {
+const resetBackend = async () => {
+  for (let i = 0; i < 100; i++) {
     try {
       const res = await remove_layer();
       if (res.message === "Layer is empty") {
@@ -92,7 +92,7 @@ export default function Network({
   }, [layerPerceptronMap, nodes, edges]);
 
   useEffect(() => {
-    resetBackend(layerPerceptronMap).then(r =>
+    resetBackend().then(r =>
         setBackend(layerPerceptronMap)
     )
   }, [layerPerceptronMap]);
