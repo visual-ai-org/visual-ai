@@ -34,9 +34,9 @@ def home():
 def add_layer():
     data = request.json
     try:
-        size = data['size']
+        num_of_nodes = data['size']
         function = data['function']
-        mlp.add_layer(size, function=function)
+        mlp.add_layer(num_of_nodes, function=function)
         weights = mlp.get_model_weights_json()
     except Exception as e:
         print(e)
@@ -86,7 +86,7 @@ def handle_train(data):
     mlp.learning_rate = learning_rate
 
     def update_callback(data):
-        print(f'Putting weights in queue: {data}')  # Debug statement
+        # print(f'Putting weights in queue: {data}')  # Debug statement
         update_queue.put(data)
 
     trainer = Train(mlp, update_callback)
@@ -101,10 +101,10 @@ def process_updates():
             data = update_queue.get()
 
             if data['type'] == 'weights':
-                print(f'Emitting Weights: {data}')
+                # print(f'Emitting Weights: {data}')
                 socketio.emit('weight_update', {'data': data})
             elif data['type'] == "loss":
-                print(f'Emitting Loss: {data}')
+                # print(f'Emitting Loss: {data}')
                 socketio.emit('loss_update', {'data': data})
         time.sleep(0.02)  # Sleep for 1 second
 

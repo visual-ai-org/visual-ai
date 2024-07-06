@@ -46,22 +46,30 @@ class TestAPI(unittest.TestCase):
     #     self.assertEqual(len(response.json), 3)  # 2 input size + 1 bias
 
     def test_logistic_regression(self):
+        set_input_size_url = 'api/set_input_size'
+        set_input_size_payload = {
+            "size": 3
+        }
+        self.app.post(set_input_size_url, data=json.dumps(set_input_size_payload), content_type='application/json')
         create_url = '/api/add_layer'
-        create_payload = {
-            "size": 2,
-            "function": "sigmoid",
-        }
-        self.app.post(create_url, data=json.dumps(create_payload), content_type='application/json')
-        create_payload = {
-            "size": 1,
-            "function": "sigmoid"
-        }
-        self.app.post(create_url, data=json.dumps(create_payload), content_type='application/json')
+        create_payloads = [
+            {"size": 2, "function": "sigmoid"},
+            {"size": 4, "function": "sigmoid"},
+            {"size": 1, "function": "sigmoid"}
+        ]
+        for payload in create_payloads:
+            self.app.post(create_url, data=json.dumps(payload), content_type='application/json')
 
         set_data = '/api/set_train_data'
         data_payload = {
-            "X_train": [[0, 0], [0, 1], [1, 0], [1, 1]],
-            "y_train": [[0], [1], [1], [0]],
+            "X_train": [[0, 0, 1],
+                        [0, 1, 1],
+                        [1, 0, 1],
+                        [1, 1, 0]],
+            "y_train": [[0],
+                        [1],
+                        [1],
+                        [0]],
         }
         self.app.post(set_data, data=json.dumps(data_payload), content_type='application/json')
 
