@@ -1,9 +1,12 @@
 import eventlet
 
+eventlet.monkey_patch()  # This must be the very first import
+
+from ml.mlp import Mlp
 from ml import mlp
 from ml.train import Train
 
-eventlet.monkey_patch()  # This must be the very first import
+
 
 import time
 import numpy as np
@@ -14,7 +17,7 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, origins=["http://localhost:3000"])
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 update_queue = Queue()
