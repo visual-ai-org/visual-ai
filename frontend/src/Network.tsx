@@ -36,15 +36,17 @@ export default function Network({
   const getNodes = (layerPerceptronMap: Map<number, number>) => {
     const result: CustomNode[] = [];
     var x: number = 100;
-    var y: number = 20;
+    // var y: number = 20;
     for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
+      var y = 600 / (perceptrons + 1)
+      var interval = 600 / (perceptrons + 1)
       for (let i = 0; i < perceptrons; i++) {
         const node: CustomNode = { x: x, y: y, value: 1 };
         result.push(node);
-        y += 100;
+        y += interval;
       }
       x += 150;
-      y = 20;
+      // y = 20;
     }
     return result;
   };
@@ -89,7 +91,7 @@ export default function Network({
     setEdges(getEdges(layerPerceptronMap, nodes))
     console.log("edges", edges)
     setGraph({nodes: nodes, links: edges})
-  }, [layerPerceptronMap, nodes, edges]);
+  }, [layerPerceptronMap, nodes]);
 
   useEffect(() => {
     resetBackend().then(r =>
