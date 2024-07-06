@@ -88,7 +88,7 @@ const updateNodeValue = (nodes: CustomNode[], weights: Weights): CustomNode[] =>
 
 const adjustColorIntensity = (color: string, value: number) => {
   // Ensure value is between 0 and 1
-  const intensity = Math.min(1, 0.7 + value);
+  const intensity = Math.min(1, 0.5 + value);
 
   // Parse the hex color
   const hex = color.replace('#', '');
@@ -158,9 +158,13 @@ export default function Network({
       for (let i = 0; i < perceptrons; i++) {
         const node: CustomNode = { x: x, y: y, value: 1, layer: layer, index: i };
         if (layer == 1) {
+          // input
           node.color = "#FF6666"
+          node.size = 16
         } else if (layer >= length) {
+          // output
           node.color = "#64ff64"
+          node.size = 16
         } else {
           node.color = "#448cfd"
         }
@@ -252,9 +256,9 @@ export default function Network({
           graph={graph}
           top={30}
           left={100}
-          nodeComponent={({node: {color, value}}) => {
+          nodeComponent={({node: {color, value, size}}) => {
             const adjustedColor = color ? adjustColorIntensity(color, value) : '#ffffff';
-            return <DefaultNode r={20} fill={adjustedColor} />;
+            return <DefaultNode r={size ? size : 20} fill={adjustedColor} />;
           }}
           linkComponent={({ link: { source, target, value } }) => (
             <line

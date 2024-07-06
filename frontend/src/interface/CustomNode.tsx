@@ -5,5 +5,6 @@ export interface CustomNode {
     value: number;
     layer: number;
     index: number;
+    size?: number;
 }
 
