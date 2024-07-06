@@ -1,8 +1,5 @@
-import json
-
 import eventlet
 
-from backend.ml.mlp import Mlp
 from ml import mlp
 from ml.train import Train
 
