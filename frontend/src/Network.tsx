@@ -3,21 +3,7 @@ import {DefaultNode, Graph} from "@visx/network";
 import {NetworkProps} from "./interface/NetworkProps";
 import {addLayer, remove_layer} from "./api";
 import {Box, Container, TextField, Typography} from "@mui/material";
-import {Text} from "@visx/visx";
 import Epoch from "./epoch";
-
-type PerceptronWeights = {
-  bias: number;
-  weights: number[];
-};
-
-type LayerWeights = {
-  [key: string]: PerceptronWeights;
-};
-
-type Weights = {
-  [key: string]: LayerWeights;
-};
 
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   let r;
@@ -162,10 +148,9 @@ export default function Network({
   }, [nodes]);
 
   useEffect(() => {
-    console.log("edges", edges)
+    console.log("edges network", edges)
     setGraph({nodes: nodes, links: edges});
   }, [edges]);
-
 
   return width < 10 ? null : (
     <Box>
