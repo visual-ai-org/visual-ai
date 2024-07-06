@@ -1,4 +1,4 @@
-interface EpochObject {
+export interface EpochObject {
     data: {
         type: "loss";
         epoch: number;

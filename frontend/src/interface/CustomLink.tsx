@@ -1,4 +1,6 @@
-interface CustomLink {
+import {CustomNode} from "./CustomNode";
+
+export interface CustomLink {
     source: CustomNode;
     target: CustomNode;
     value: Number;

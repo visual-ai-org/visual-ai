@@ -4,6 +4,10 @@ import {NetworkProps} from "./interface/NetworkProps";
 import {addLayer, remove_layer} from "./api";
 import {Box, Container, TextField, Typography} from "@mui/material";
 import Epoch from "./epoch";
+import {CustomLink} from "./interface/CustomLink";
+import {CustomNode} from "./interface/CustomNode";
+import {Weights} from "./interface/WeightObject";
+import {GraphProps} from "./interface/GraphProps";
 
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   let r;
@@ -65,6 +69,46 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
   return newEdges;
 };
 
+const updateNodeValue = (nodes: CustomNode[], weights: Weights): CustomNode[] => {
+  const newNodes = nodes.map(node => {
+    const layer = node.layer
+    const index = node.index
+
+    const layerKey = `layer ${layer - 1}`;
+    const perceptronKey = `perceptron ${index}`;
+
+    //@ts-ignore
+    node.value = weights[layerKey][perceptronKey].bias
+
+    return { ...node}
+  });
+
+  return newNodes;
+}
+
+const adjustColorIntensity = (color: string, value: number) => {
+  // Ensure value is between 0 and 1
+  const intensity = Math.min(1, 0.7 + value);
+
+  // Parse the hex color
+  const hex = color.replace('#', '');
+
+  // Convert to RGB
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  // Adjust intensity
+  const adjust = (channel: number) => Math.round(channel * intensity);
+
+  // Convert back to hex
+  const newR = adjust(r).toString(16).padStart(2, '0');
+  const newG = adjust(g).toString(16).padStart(2, '0');
+  const newB = adjust(b).toString(16).padStart(2, '0');
+
+  return `#${newR}${newG}${newB}`;
+};
+
 export default function Network({
   width,
   height,
@@ -77,11 +121,37 @@ export default function Network({
   const [nodes, setNodes] = useState<CustomNode[]>([]);
   const [edges, setEdges] = useState<CustomLink[]>([]);
   const [graph, setGraph] = useState<GraphProps>();
+  // const [triggerBackend, setTriggerBackend] = useState<Boolean>(false)
+  // let prevLayers: Map<number, number>;
+
+  // const checkSameLayers = (prevLayers: Map<number, number>, newLayers: Map<number, number>): boolean => {
+  //   // Check if sizes are different
+  //   if (prevLayers.size !== newLayers.size) {
+  //     return false;
+  //   }
+  //
+  //   // Check if all entries are the same
+  //   for (const [key, value] of prevLayers) {
+  //     if (newLayers.get(key) !== value) {
+  //       return false;
+  //     }
+  //   }
+  //
+  //   return true;
+  // };
+  //
+  // const checkLayersSize = (prevLayers: Map<number, number>, newLayers: number): boolean => {
+  //   if (prevLayers.size !== newLayers) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   const getNodes = (layerPerceptronMap: Map<number, number>) => {
     const result: CustomNode[] = [];
     var x: number = 100;
-
+    const length = layerPerceptronMap.size
+    console.log("len", length)
     for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
       var y = 600 / (perceptrons + 1)
       var interval = 600 / (perceptrons + 1)
@@ -89,6 +159,10 @@ export default function Network({
         const node: CustomNode = { x: x, y: y, value: 1, layer: layer, index: i };
         if (layer == 1) {
           node.color = "#FF6666"
+        } else if (layer >= length) {
+          node.color = "#64ff64"
+        } else {
+          node.color = "#448cfd"
         }
 
         result.push(node);
@@ -135,12 +209,21 @@ export default function Network({
     const nodes = getNodes(layerPerceptronMap);
     setNodes(nodes);
     setEdges(getEdges(layerPerceptronMap, nodes));
+    // if (prevLayers && checkSameLayers(prevLayers, layerPerceptronMap)) {
+    //   setTriggerBackend(!triggerBackend)
+    // }
+    // prevLayers = layerPerceptronMap
   }, [layerPerceptronMap]);
 
   useEffect(() => {
+    console.log("backend update")
     resetBackend().then(r =>
         setBackend(layerPerceptronMap).then(
             r => {
+              // if (checkLayersSize(layerPerceptronMap, r.weights.size)) {
+              //   setTriggerBackend(!triggerBackend)
+              //   return
+              // }
               setEdges(updateEdgeValue(edges, r.weights))
             }
         )
@@ -150,6 +233,7 @@ export default function Network({
   useEffect(() => {
     if (weights[0]) {
       setEdges(updateEdgeValue(edges, weights[0].data.weights))
+      setNodes(updateNodeValue(nodes, weights[0].data.weights))
     }
   }, [weights]);
 
@@ -168,9 +252,10 @@ export default function Network({
           graph={graph}
           top={30}
           left={100}
-          nodeComponent={({node: {color}}) => (
-              color ? <DefaultNode r={20} fill={color} /> : <DefaultNode r={20} />
-          )}
+          nodeComponent={({node: {color, value}}) => {
+            const adjustedColor = color ? adjustColorIntensity(color, value) : '#ffffff';
+            return <DefaultNode r={20} fill={adjustedColor} />;
+          }}
           linkComponent={({ link: { source, target, value } }) => (
             <line
               x1={source.x}

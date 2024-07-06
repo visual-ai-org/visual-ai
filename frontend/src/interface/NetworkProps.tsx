@@ -1,3 +1,6 @@
+import {EpochObject} from "./EpochObject";
+import {WeightObject} from "./WeightObject";
+
 export type NetworkProps = {
     width: number;
     height: number;

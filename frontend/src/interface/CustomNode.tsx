@@ -1,4 +1,4 @@
-interface CustomNode {
+export interface CustomNode {
     x: number;
     y: number;
     color?: string;

@@ -1,4 +1,4 @@
-interface Perceptron {
+export interface Perceptron {
     weights: number[];
     bias: number;
 }
@@ -7,7 +7,7 @@ interface Layer {
     [key: string]: Perceptron;
 }
 
-interface Weights {
+export interface Weights {
     [key: string]: Layer;
 }
 
@@ -16,6 +16,6 @@ interface Data {
     weights: Weights;
 }
 
-interface WeightObject {
+export interface WeightObject {
     data: Data;
 }
