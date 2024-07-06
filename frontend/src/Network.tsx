@@ -44,8 +44,8 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
     const sourceIndex = edge.sourceIndex;
 
     // Form the keys for the source layer and perceptron
-    const sourceLayerKey = `layer ${sourceLayer}`;
-    const targetLayerKey = `layer ${targetLayer}`;
+    const sourceLayerKey = `layer ${sourceLayer - 1}`;
+    const targetLayerKey = `layer ${targetLayer - 1}`;
     const perceptronKey = `perceptron ${sourceIndex}`;
 
     // Log the keys to debug
