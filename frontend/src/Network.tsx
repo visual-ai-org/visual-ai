@@ -148,6 +148,12 @@ export default function Network({
   }, [nodes]);
 
   useEffect(() => {
+    if (weights[0]) {
+      setEdges(updateEdgeValue(edges, weights[0].data.weights))
+    }
+  }, [weights]);
+
+  useEffect(() => {
     console.log("edges network", edges)
     setGraph({nodes: nodes, links: edges});
   }, [edges]);
