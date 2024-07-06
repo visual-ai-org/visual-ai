@@ -41,7 +41,7 @@ curl -X POST http://127.0.0.1:5000/api/add_layer -H "Content-Type: application/j
 **Request Payload:**
 ```json
 {
-    "size": 2  // input size
+    "size": 2  // input size (no. of columns/features)
 }
 ```
 **Response:**

@@ -3,5 +3,7 @@ interface CustomNode {
     y: number;
     color?: string;
     value: number;
+    layer: number;
+    index: number;
 }
 
