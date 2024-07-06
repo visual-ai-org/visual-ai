@@ -171,13 +171,13 @@ export default function Network({
           nodeComponent={({node: {color}}) => (
               color ? <DefaultNode r={20} fill={color} /> : <DefaultNode r={20} />
           )}
-          linkComponent={({ link: { source, target } }) => (
+          linkComponent={({ link: { source, target, value } }) => (
             <line
               x1={source.x}
               y1={source.y}
               x2={target.x}
               y2={target.y}
-              strokeWidth={2}
+              strokeWidth={3 + Number(value)}
               stroke="#999"
               strokeOpacity={0.6}
               // strokeDasharray={dashed ? '8,4' : undefined}
