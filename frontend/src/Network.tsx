@@ -1,7 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { DefaultNode, Graph } from "@visx/network";
+import React, {useEffect, useState} from "react";
+import {DefaultNode, Graph} from "@visx/network";
 import {NetworkProps} from "./interface/NetworkProps";
 import {addLayer, remove_layer} from "./api";
+
+type PerceptronWeights = {
+  bias: number;
+  weights: number[];
+};
+
+type LayerWeights = {
+  [key: string]: PerceptronWeights;
+};
+
+type Weights = {
+  [key: string]: LayerWeights;
+};
 
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   let r;
@@ -24,13 +37,43 @@ const resetBackend = async () => {
   }
 }
 
-const updateNodeValue = (nodes: CustomNode[], weights: any) => {
-    console.log("weights", weights)
-    return nodes.map(node => {
-        node.value = 1;
-        return node;
-    });
-}
+const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] => {
+  return edges.map(edge => {
+    const sourceLayer = Number(edge.sourceLayer);
+    const targetLayer = Number(edge.targetLayer);
+    const sourceIndex = edge.sourceIndex;
+
+    // Form the keys for the source layer and perceptron
+    const sourceLayerKey = `layer ${sourceLayer}`;
+    const targetLayerKey = `layer ${targetLayer}`;
+    const perceptronKey = `perceptron ${sourceIndex}`;
+
+    // Log the keys to debug
+    console.log(`sourceLayerKey: ${sourceLayerKey}, targetLayerKey: ${targetLayerKey}, perceptronKey: ${perceptronKey}`);
+
+    // Check if the keys exist
+    if (weights[sourceLayerKey] && weights[sourceLayerKey][perceptronKey]) {
+      const perceptronWeights = weights[sourceLayerKey][perceptronKey].weights;
+      const weightIndex = targetLayer - sourceLayer - 1;
+
+      // Log the weightIndex to debug
+      console.log(`weightIndex: ${weightIndex}, perceptronWeights: ${perceptronWeights}`);
+
+      // Check if the weight index is valid
+      if (weightIndex >= 0 && weightIndex < perceptronWeights.length) {
+        const weightValue = perceptronWeights[weightIndex];
+        return { ...edge, value: weightValue };
+      } else {
+        console.error(`Invalid weight index: ${weightIndex} for sourceLayer ${sourceLayer}, targetLayer ${targetLayer}`);
+      }
+    } else {
+      console.error(`Invalid keys: sourceLayerKey = ${sourceLayerKey}, targetLayerKey = ${targetLayerKey}, perceptronKey = ${perceptronKey}`);
+    }
+
+    // Return edge with default value if there was an error
+    return { ...edge, value: 0 };
+  });
+};
 
 export default function Network({
   width,
@@ -46,70 +89,69 @@ export default function Network({
   const getNodes = (layerPerceptronMap: Map<number, number>) => {
     const result: CustomNode[] = [];
     var x: number = 100;
-    // var y: number = 20;
+
     for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
       var y = 600 / (perceptrons + 1)
       var interval = 600 / (perceptrons + 1)
       for (let i = 0; i < perceptrons; i++) {
-        const node: CustomNode = { x: x, y: y, value: 1 };
+        const node: CustomNode = { x: x, y: y, value: 1, layer: layer, index: i };
         result.push(node);
         y += interval;
       }
       x += 150;
-      // y = 20;
     }
     return result;
   };
 
-  const getEdges = (layerPerceptronMap: Map<number, number>,  nodes: CustomNode[]) => {
+  const getEdges = (layerPerceptronMap: Map<number, number>, nodes: CustomNode[]) => {
     const result: CustomLink[] = [];
-    // calculate the number of perceptrons in each layer
-    // console.log(layerPerceptronMap)
-    // console.log(layerPerceptronMap.entries())
-    const layerPerceptrons = Array.from(layerPerceptronMap.entries())
-    // console.log(layerPerceptrons)
-    var prevLayerNumNodes = layerPerceptrons[0][1]
-    // console.log("prev layer number", prevLayerNumNodes)
-    var prevLayer = nodes.slice(0, prevLayerNumNodes)
-    // console.log("prevLayer", prevLayer)
-    var offset = prevLayerNumNodes
-    for (let i = 1; i < layerPerceptrons.length; i++) {
-      const nextLayerNumNodes = layerPerceptrons[i][1]
-      // console.log("next layer num", nextLayerNumNodes)
-      const nextLayer = nodes.slice(offset, offset + nextLayerNumNodes)
-      // console.log("next layer", nextLayer)
+    const layerPerceptrons = Array.from(layerPerceptronMap.entries());
 
-      // form the links
+    var prevLayerNumNodes = layerPerceptrons[0][1];
+    var prevLayer = nodes.slice(0, prevLayerNumNodes);
+    var offset = prevLayerNumNodes;
+
+    for (let i = 1; i < layerPerceptrons.length; i++) {
+      const nextLayerNumNodes = layerPerceptrons[i][1];
+      const nextLayer = nodes.slice(offset, offset + nextLayerNumNodes);
+
       for (const source of prevLayer) {
         for (const target of nextLayer) {
-          const newLink: CustomLink = {source: source, target: target}
-          result.push(newLink)
+          const newLink: CustomLink = {
+            source: source,
+            target: target,
+            value: 1,
+            sourceLayer: source.layer,
+            targetLayer: target.layer,
+            sourceIndex: source.index,
+            targetIndex: target.index
+          };
+          result.push(newLink);
         }
-        // console.log("layer connection", result)
       }
-      // update the offset and make previous layer become next layer
-      offset += nextLayerNumNodes
-      // prevLayerNumNodes = nextLayerNumNodes
-      prevLayer = nextLayer
+      offset += nextLayerNumNodes;
+      prevLayer = nextLayer;
     }
-    return result
+    return result;
   }
 
   useEffect(() => {
-    // Set Nodes
-    setNodes(getNodes(layerPerceptronMap))
-    setEdges(getEdges(layerPerceptronMap, nodes))
-    console.log("edges", edges)
-    setGraph({nodes: nodes, links: edges})
-  }, [layerPerceptronMap, nodes]);
+    const nodes = getNodes(layerPerceptronMap);
+    setNodes(nodes);
+    setEdges(getEdges(layerPerceptronMap, nodes));
+  }, [layerPerceptronMap]);
 
   useEffect(() => {
     resetBackend().then(r =>
         setBackend(layerPerceptronMap).then(
-            r => updateNodeValue(nodes, r.weights)
+            r => setEdges(updateEdgeValue(edges, r.weights))
         )
     )
   }, [layerPerceptronMap]);
+
+  useEffect(() => {
+    setGraph({nodes: nodes, links: edges});
+  }, [layerPerceptronMap, nodes]);
 
   return width < 10 ? null : (
     <svg width={width} height={height}>
