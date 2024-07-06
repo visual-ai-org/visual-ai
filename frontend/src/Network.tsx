@@ -42,11 +42,13 @@ export default function Network({
       var interval = 600 / (perceptrons + 1)
       for (let i = 0; i < perceptrons; i++) {
         const node: CustomNode = { x: x, y: y, value: 1 };
+        if (layer == 1) {
+          node.color = "#FF6666"
+        }
         result.push(node);
         y += interval;
       }
       x += 150;
-      // y = 20;
     }
     return result;
   };
@@ -89,7 +91,7 @@ export default function Network({
     // Set Nodes
     setNodes(getNodes(layerPerceptronMap))
     setEdges(getEdges(layerPerceptronMap, nodes))
-    console.log("edges", edges)
+    // console.log("edges", edges)
     setGraph({nodes: nodes, links: edges})
   }, [layerPerceptronMap, nodes]);
 
@@ -105,11 +107,8 @@ export default function Network({
         graph={graph}
         top={30}
         left={100}
-        nodeComponent={({ node: { value } }) => (
-          <g>
-            <DefaultNode r={20} />
-            <text textAnchor="middle"> {value} </text>
-          </g>
+        nodeComponent={({node: {color}}) => (
+            color ? <DefaultNode r={20} fill={color} /> : <DefaultNode r={20} />
         )}
         linkComponent={({ link: { source, target } }) => (
           <line

@@ -9,6 +9,7 @@ import ApiComponent from "./api";
 import IntroModal from "./IntroModal";
 import ReactFlow from "reactflow";
 import ParentSize from '@visx/responsive/lib/components/ParentSize';
+import { setInputSize } from './api';
 
 import "reactflow/dist/style.css";
 import Network from './Network';
@@ -49,8 +50,19 @@ const App: React.FC = () => {
   });
 
   useEffect(() => {
+    const setInput = async () => {
+      try {
+        console.log(items.get("1"))
+        const response = await setInputSize(items.get("1"))
+        console.log(response)
+      } catch (error) {
+        console.error("error setting input", error)
+      }
+    }
+
+    setInput()
     console.log(items)
-  })
+  }, [items.get("1")])
 
   return (
     <ThemeProvider theme={theme}>

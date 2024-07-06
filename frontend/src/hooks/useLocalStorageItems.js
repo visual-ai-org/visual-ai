@@ -35,6 +35,7 @@ export default function useLocalStorageItems() {
   const map = new Map();
   // console.log("items", items)
   for (const item of items) {
+
     map.set(item.layer, item.perceptrons)
   }
 

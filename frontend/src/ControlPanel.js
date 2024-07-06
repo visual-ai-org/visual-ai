@@ -21,7 +21,7 @@ import Perceptron from "./Perceptron";
 import Layer from "./Layer";
 
 const drawerWidth = 400;
-const layerLimit = 5;
+const layerLimit = 6;
 
 export default function ControlPanel() {
   const [layers, setLayers] = useState(0);
