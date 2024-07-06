@@ -7,7 +7,7 @@
 ## Requirements
 
 - Backend:
-  - Python 3.6.9
+  - Python 3.9.6
   - pip install -r requirements.txt
 - Frontend:
   - cd frontend
