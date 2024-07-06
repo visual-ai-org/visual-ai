@@ -76,17 +76,17 @@ export default function Network({
     // console.log(layerPerceptronMap)
     // console.log(layerPerceptronMap.entries())
     const layerPerceptrons = Array.from(layerPerceptronMap.entries())
-    console.log(layerPerceptrons)
+    // console.log(layerPerceptrons)
     var prevLayerNumNodes = layerPerceptrons[0][1]
-    console.log("prev layer number", prevLayerNumNodes)
+    // console.log("prev layer number", prevLayerNumNodes)
     var prevLayer = nodes.slice(0, prevLayerNumNodes)
-    console.log("prevLayer", prevLayer)
+    // console.log("prevLayer", prevLayer)
     var offset = prevLayerNumNodes
     for (let i = 1; i < layerPerceptrons.length; i++) {
       const nextLayerNumNodes = layerPerceptrons[i][1]
-      console.log("next layer num", nextLayerNumNodes)
+      // console.log("next layer num", nextLayerNumNodes)
       const nextLayer = nodes.slice(offset, offset + nextLayerNumNodes)
-      console.log("next layer", nextLayer)
+      // console.log("next layer", nextLayer)
 
       // form the links
       for (const source of prevLayer) {
@@ -94,7 +94,7 @@ export default function Network({
           const newLink: CustomLink = {source: source, target: target}
           result.push(newLink)
         }
-        console.log("layer connection", result)
+        // console.log("layer connection", result)
       }
       // update the offset and make previous layer become next layer
       offset += nextLayerNumNodes
@@ -108,9 +108,9 @@ export default function Network({
     // Set Nodes
     setNodes(getNodes(layerPerceptronMap))
     setEdges(getEdges(layerPerceptronMap, nodes))
-    // console.log("edges", edges)
+    console.log("edges", edges)
     setGraph({nodes: nodes, links: edges})
-  }, [layerPerceptronMap]);
+  }, [layerPerceptronMap, nodes, edges]);
 
   return width < 10 ? null : (
     <svg width={width} height={height}>
