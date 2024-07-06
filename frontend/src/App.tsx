@@ -11,7 +11,6 @@ import ReactFlow from "reactflow";
 import ParentSize from '@visx/responsive/lib/components/ParentSize';
 
 import "reactflow/dist/style.css";
-import Example from "./Example";
 import Network from './Network';
 
 const App: React.FC = () => {

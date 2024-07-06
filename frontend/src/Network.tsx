@@ -2,23 +2,6 @@ import React, { useEffect, useState } from "react";
 import { DefaultNode, Graph } from "@visx/network";
 import {NetworkProps} from "./interface/NetworkProps";
 
-const nodes: CustomNode[] = [
-  { x: 100, y: 20, value: 1 },
-  { x: 200, y: 250, value: 1 },
-  { x: 300, y: 40, value: 1 },
-];
-
-const links: CustomLink[] = [
-  { source: nodes[0], target: nodes[1] },
-  { source: nodes[1], target: nodes[2] },
-  { source: nodes[2], target: nodes[0] },
-];
-
-// const graph = {
-//   nodes,
-//   links,
-// };
-
 export default function Network({
   width,
   height,
