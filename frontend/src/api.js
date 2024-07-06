@@ -94,10 +94,6 @@ const ApiComponent = () => {
     const [weights, setWeights] = useState([]);
     const [epoch, setEpoch] = useState([])
 
-    useEffect(() => {
-
-    }, []);
-
     const handleLogisticRegression = () => {
         const socket = socket_io("localhost:5000/", {
             transports: ["websocket"],

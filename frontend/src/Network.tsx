@@ -1,30 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DefaultNode, Graph } from "@visx/network";
-
-export type NetworkProps = {
-  width: number;
-  height: number;
-  layerPerceptronMap: Map<number, number>;
-};
-
-interface CustomNode {
-  x: number;
-  y: number;
-  color?: string;
-  value: number;
-}
-
-interface CustomLink {
-  source: CustomNode;
-  target: CustomNode;
-  // value: Number;
-  // dashed?: boolean;
-}
-
-interface GraphProps {
-  nodes: CustomNode[];
-  links: CustomLink[];
-}
+import {NetworkProps} from "./interface/NetworkProps";
 
 const nodes: CustomNode[] = [
   { x: 100, y: 20, value: 1 },
