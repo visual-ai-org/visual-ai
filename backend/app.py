@@ -65,7 +65,7 @@ def remove_layer():
         return jsonify({"message": "Layer removed successfully", "weights": mlp.get_model_weights_json()}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": str(e)}), 400
+        return jsonify({"message": "Layer is empty"}), 200
 
 
 @app.route('/api/set_train_data', methods=['POST'])

@@ -4,7 +4,7 @@ import socket_io from 'socket.io-client';
 
 const baseUrl = 'http://localhost:5000';
 
-async function test() {
+export async function test() {
     const url = `${baseUrl}`;
     try {
         const response = await axios.get(url, {
@@ -19,7 +19,7 @@ async function test() {
     }
 }
 
-async function setInputSize (size) {
+export async function setInputSize (size) {
     const url = `${baseUrl}/api/set_input_size`;
     try {
         const response = await axios.post(url, {
@@ -36,7 +36,7 @@ async function setInputSize (size) {
     }
 }
 
-async function addLayer (num_perceptrons, func) {
+export async function addLayer (num_perceptrons, func) {
     const url = `${baseUrl}/api/add_layer`;
     try {
         const response = await axios.post(url, {
@@ -54,7 +54,7 @@ async function addLayer (num_perceptrons, func) {
     }
 }
 
-async function remove_layer (index) {
+export async function remove_layer (index) {
     const url = `${baseUrl}/api/remove_layer`;
     try {
         const response = await axios.delete(url, {
@@ -71,7 +71,7 @@ async function remove_layer (index) {
     }
 }
 
-async function setTrainData (train_data, labels) {
+export async function setTrainData (train_data, labels) {
     const url = `${baseUrl}/api/set_train_data`;
     try {
         const response = await axios.post(url, {
@@ -93,10 +93,6 @@ async function setTrainData (train_data, labels) {
 const ApiComponent = () => {
     const [weights, setWeights] = useState([]);
     const [epoch, setEpoch] = useState([])
-
-    useEffect(() => {
-
-    }, []);
 
     const handleLogisticRegression = () => {
         const socket = socket_io("localhost:5000/", {

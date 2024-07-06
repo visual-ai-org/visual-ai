@@ -5,135 +5,136 @@ The base URL for all endpoints is: http://127.0.0.1:5000
 
 ## Endpoints
 
-### 1. Create Perceptron
+### 1. Add Layer
 
-**Endpoint:** `/api/create_perceptron`
+**Endpoint:** `/api/add_layer`
 
 **Method:** `POST`
 
-**Description:** Creates a new Perceptron instance with the specified input size, learning rate, and number of epochs.
+**Description:** Adds a new layer to the Perceptron instance with the specified number of perceptrons and activation function. The weights are initialized randomly and can be trained using the train_perceptron endpoint. The Perceptron can be trained using the logistic_regression endpoint to perform logistic regression on the training data.
 
 **Request Payload:**
 ```json
 {
-    "input_size": 2,         // Number of inputs (excluding the bias)
-    "learning_rate": 0.01,   // Learning rate for the Perceptron
-    "epochs": 1000           // Number of training epochs
+    "size": 2,         // Number of perceptrons in the layer
+    "function": "sigmoid",   // Activation function (sigmoid, relu, tanh)
 }
 ```
 **Response:**
 ```json
 {
-  "weights": [0.0, 0.0, 0.0]  // Initial weights of the Perceptron (including the bias)
+  "message": "Layer added successfully",
+  "weights": Object // json object representing the layers weights
 }
 ```
 **Example Request:**
 ```bash
-curl -X POST http://127.0.0.1:5000/api/create_perceptron -H "Content-Type: application/json" -d '{"input_size": 2, "learning_rate": 0.01, "epochs": 1000}'
+curl -X POST http://127.0.0.1:5000/api/add_layer -H "Content-Type: application/json" -d '{"size": 2, "function": "sigmoid"}'
 ```
-**Example Response:**
-```json
-{
-  "weights": [0.0, 0.0, 0.0]
-}
-```
-### 2. Train Perceptron
-**Endpoint:** `/api/train_perceptron`
+### 2. Set Input Size
+**Endpoint:** `/api/set_input_size`
 
 **Method:** `POST`
 
-**Description:** Trains the Perceptron instance with the provided training data and labels, and returns the updated weights.
+**Description:** Sets the input size for the Neural Network.
 
 **Request Payload:**
 ```json
 {
-  "training_data": [[0, 0], [0, 1], [1, 0], [1, 1]],  // Training data (input features)
-  "labels": [0, 0, 0, 1]                             // Corresponding labels (output)
+    "size": 2  // input size
 }
 ```
 **Response:**
 ```json
 {
-  "weights": [0.01, 0.01, 0.01]  // Updated weights of the Perceptron (including the bias)
+  "message": "Input size set successfully"  
 }
 ```
 **Example Request:**
 ```bash
-curl -X POST http://127.0.0.1:5000/api/train_perceptron -H "Content-Type: application/json" -d '{"training_data": [[0, 0], [0, 1], [1, 0], [1, 1]], "labels": [0, 0, 0, 1]}'
+curl -X POST http://127.0.0.1:5000/api/set_input_size -H "Content-Type: application/json" -d '{"size": 2}'
 ```
-**Example Response:**
+
+### 3. Remove Layer
+**Endpoint:** `/api/remove_layer`
+
+**Method:** `DELETE`
+
+**Description:** Removes the last layer from the Neural Network.
+
+**Response:**
 ```json
 {
-  "weights": [0.02, 0.01, 0.01]
+  "message": "Layer removed successfully",
+  "weights": Object // json object representing the layers weights
 }
 ```
 
-### 3. Logistic Regression
-**Endpoint:** `/api/logistic_regression`
+**Example Request:**
+```bash
+curl -X DELETE http://127.0.0.1:5000/api/remove_layer
+```
+
+### 4. Set Train Data
+**Endpoint:** `/api/set_train_data`
 
 **Method:** `POST`
+
+**Description:** Sets the training data and labels for the Neural Network.
+
+**Request Payload:**
+```json
+{
+    X_train: [[0, 0], [0, 1], [1, 0], [1, 1]],  // Training data
+    y_train: [[0], [1], [1], [0]]  // Labels
+}
+```
+
+**Response:**
+```json
+{
+  "message": "{X_train}, {y_train}"
+}
+```
+
+**Example Request:**
+```bash
+curl -X POST http://localhost:5000/api/set_train_data -H "Content-Type: application/json" -d '{"X_train": [[0, 0], [0, 1], [1, 0], [1, 1]], "y_train": [[0], [1], [1], [0]]}'
+```
+
+### 4. Train
+**Endpoint:** `train`
+
+**Method:** `SOCKET`
 
 **Description:** 	
-- Use the WebSocket event logistic_regression with the specified payload to start logistic regression training.
-- The server will send real-time updates of the weights through the weight_update event and notify when training is complete with the training_complete event.
-
+- Trains the Neural Network using the specified training data and labels.
+- The training data and labels are sent to the server using the 'train' event.
+- The server will send real-time updates to the client using the 'weight_update' event.
+- The server will send 'loss_update' event to update the loss value.
+- Once the training is complete, the server will send the 'training_complete' event.
 
 **Request Payload:**
 ```json
 {
-    "identifier": "perceptron1",  // Unique identifier for the Perceptron
-    "training_data": [[0, 0], [0, 1], [1, 0], [1, 1]],  // Training data (input features)
-    "labels": [0, 0, 0, 1]        // Corresponding labels (output)
+    learning_rate: 0.01,  // Learning rate for the training (optional, default: 0.01)
+    epochs: 1000          // Number of epochs to train the Neural Network (optional, default: 1000)
 }
 ```
 
 **Real-Time Updates:**
-- Event: weight_update
+1. Event: weight_update
   ```json
   {
-    "weights": [0.01, 0.01, 0.01]  // Current weights of the Perceptron (including the bias)
-  }
-  ```
-- Event: training_complete
-  ```json
-  {
-    "weights": [0.02, 0.01, 0.01]  // Final weights of the Perceptron (including the bias)
+    "data": Object  // Current weights of the Neural Network
   }
   ```
 
-**Example Frontend Integration:**
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Logistic Regression</title>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-</head>
-<body>
-    <h1>Logistic Regression Training</h1>
-    <pre id="output"></pre>
-
-    <script>
-        var socket = io('http://127.0.0.1:5000');
-
-        socket.on('connect', function() {
-            console.log('Connected to server');
-            socket.emit('logistic_regression', {
-                identifier: 'perceptron1',
-                training_data: [[0, 0], [0, 1], [1, 0], [1, 1]],
-                labels: [0, 0, 0, 1]
-            });
-        });
-
-        socket.on('weight_update', function(data) {
-            document.getElementById('output').textContent += 'Weights: ' + data.weights + '\n';
-        });
-
-        socket.on('training_complete', function(data) {
-            document.getElementById('output').textContent += 'Training complete! Final weights: ' + data.weights + '\n';
-        });
-    </script>
-</body>
-</html>
-```
+2. Event: loss_update
+  ```json
+  {
+    "data": Object  // Current loss value of the Neural Network
+  }
+  ```
+  
+3. Event: training_complete
