@@ -56,6 +56,7 @@ const App: React.FC = () => {
     <ThemeProvider theme={theme}>
       <div style={{ flex: 1, width: '100vw', height: '100vw' }}>
         <IntroModal open={open} handleClose={handleClose} />
+        <ApiComponent />
         <ParentSize>{({ width, height }) => <Network width={width} height={height} layerPerceptronMap={items}/>}</ParentSize>
         <ControlPanel />
       </div>

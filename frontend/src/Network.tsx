@@ -1,6 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { DefaultNode, Graph } from "@visx/network";
 import {NetworkProps} from "./interface/NetworkProps";
+import {addLayer, remove_layer} from "./api";
+
+const setBackend = async (layerPerceptronMap: Map<number, number>) => {
+  for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
+    await addLayer(perceptrons, "sigmoid")
+  }
+}
+
+const resetBackend = async (layerPerceptronMap: Map<number, number>) => {
+  for (let i = 0; i < 5; i++) {
+    try {
+      const res = await remove_layer();
+      if (res.message === "Layer is empty") {
+        break;
+      }
+    } catch (error) {
+      console.error('Error removing layer:', error);
+    }
+  }
+}
 
 export default function Network({
   width,
@@ -70,6 +90,12 @@ export default function Network({
     console.log("edges", edges)
     setGraph({nodes: nodes, links: edges})
   }, [layerPerceptronMap, nodes, edges]);
+
+  useEffect(() => {
+    resetBackend(layerPerceptronMap).then(r =>
+        setBackend(layerPerceptronMap)
+    )
+  }, [layerPerceptronMap]);
 
   return width < 10 ? null : (
     <svg width={width} height={height}>

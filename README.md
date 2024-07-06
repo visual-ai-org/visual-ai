@@ -13,6 +13,8 @@
   - cd frontend
   - npm install
   - npm start
+- For testing:
+  - Firefox browser
 
 ## Dev Tools Used
 
