@@ -1,4 +1,5 @@
 import {
+  Button,
   DialogContent,
   Divider,
   List,
@@ -10,15 +11,13 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import PropTypes from "prop-types";
 import Drawer from "@mui/material/Drawer";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import Perceptron from "./Perceptron";
 import Layer from "./Layer";
+import {setTrainData} from "./api";
 
 const drawerWidth = 400;
 const layerLimit = 6;
@@ -76,6 +75,11 @@ export default function ControlPanel() {
       variant="permanent"
       anchor="right"
     >
+      <Button
+          onClick={() => setTrainData([[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]])}
+      >
+        Set Training Data
+      </Button>
       <DialogContent>
         <Toolbar variant="regular">
           <Typography variant="h7" color="inherit" component="div">
