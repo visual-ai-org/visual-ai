@@ -4,9 +4,11 @@ import {NetworkProps} from "./interface/NetworkProps";
 import {addLayer, remove_layer} from "./api";
 
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
+  let r;
   for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
-    await addLayer(perceptrons, "sigmoid")
+    r = addLayer(perceptrons, "sigmoid")
   }
+  return r
 }
 
 const resetBackend = async () => {
@@ -20,6 +22,14 @@ const resetBackend = async () => {
       console.error('Error removing layer:', error);
     }
   }
+}
+
+const updateNodeValue = (nodes: CustomNode[], weights: any) => {
+    console.log("weights", weights)
+    return nodes.map(node => {
+        node.value = 1;
+        return node;
+    });
 }
 
 export default function Network({
@@ -93,7 +103,9 @@ export default function Network({
 
   useEffect(() => {
     resetBackend().then(r =>
-        setBackend(layerPerceptronMap)
+        setBackend(layerPerceptronMap).then(
+            r => updateNodeValue(nodes, r.weights)
+        )
     )
   }, [layerPerceptronMap]);
 
