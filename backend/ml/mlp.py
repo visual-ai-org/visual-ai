@@ -61,3 +61,6 @@ class Mlp:
         out_class = max(output.items(), key=operator.itemgetter(1))[0]
         out_prob = output[out_class]
         return out_class, out_prob
+
+    def remove_layer(self):
+        self.layers.pop()

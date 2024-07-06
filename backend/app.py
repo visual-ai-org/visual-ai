@@ -58,10 +58,14 @@ def set_input_size():
     return jsonify({"message": "Input size set successfully"}), 200
 
 
-# @app.route('/api/remove_layer', methods=['DELETE'])
-# def remove_layer():
-#     mlp.remove_layer()
-#     return jsonify({"message": "Layer removed successfully", "weights": mlp.get_model_weights_json()}), 200
+@app.route('/api/remove_layer', methods=['DELETE'])
+def remove_layer():
+    try:
+        mlp.remove_layer()
+        return jsonify({"message": "Layer removed successfully", "weights": mlp.get_model_weights_json()}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"message": str(e)}), 400
 
 
 @app.route('/api/set_train_data', methods=['POST'])

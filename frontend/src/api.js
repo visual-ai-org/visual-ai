@@ -54,20 +54,22 @@ async function addLayer (num_perceptrons, func) {
     }
 }
 
-// async function remove_layer () {
-//     const url = `${baseUrl}/api/remove_layer`;
-//     try {
-//         const response = await axios.delete(url, {
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//         });
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error:', error.response ? error.response.data : error.message);
-//         throw new Error(error.response ? error.response.data : error.message);
-//     }
-// }
+async function remove_layer (index) {
+    const url = `${baseUrl}/api/remove_layer`;
+    try {
+        const response = await axios.delete(url, {
+            index: index
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error.response ? error.response.data : error.message);
+        throw new Error(error.response ? error.response.data : error.message);
+    }
+}
 
 async function setTrainData (train_data, labels) {
     const url = `${baseUrl}/api/set_train_data`;
@@ -148,10 +150,10 @@ const ApiComponent = () => {
                 }}>
                 Add Layer
             </button>
-            {/*<button*/}
-            {/*    onClick={() => remove_layer()}>*/}
-            {/*    Remove Layer*/}
-            {/*</button>*/}
+            <button
+                onClick={() => remove_layer()}>
+                Remove Layer
+            </button>
             <button
                 onClick={() => setTrainData([[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]])}>
                 Set Training Data
