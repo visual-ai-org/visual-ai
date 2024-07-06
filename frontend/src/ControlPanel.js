@@ -22,7 +22,7 @@ import {setTrainData} from "./api";
 const drawerWidth = 400;
 const layerLimit = 6;
 
-export default function ControlPanel() {
+export default function ControlPanel({handleTraining}) {
   const [layers, setLayers] = useState(0);
 
   useEffect(() => {
@@ -109,6 +109,9 @@ export default function ControlPanel() {
           <RemoveIcon fontSize="large" />
         </ListItemButton>
       </List>
+      <Button onClick={handleTraining}>
+        Start Training
+      </Button>
     </Drawer>
   );
 }

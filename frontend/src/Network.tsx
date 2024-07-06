@@ -2,6 +2,9 @@ import React, {useEffect, useState} from "react";
 import {DefaultNode, Graph} from "@visx/network";
 import {NetworkProps} from "./interface/NetworkProps";
 import {addLayer, remove_layer} from "./api";
+import {Box, Container, TextField, Typography} from "@mui/material";
+import {Text} from "@visx/visx";
+import Epoch from "./epoch";
 
 type PerceptronWeights = {
   bias: number;
@@ -80,6 +83,8 @@ export default function Network({
   width,
   height,
   layerPerceptronMap,
+  weights,
+  epoch
 }: NetworkProps) {
 
   // TODO: figure out how to store the links and nodes from the map
@@ -161,28 +166,34 @@ export default function Network({
     setGraph({nodes: nodes, links: edges});
   }, [edges]);
 
+
   return width < 10 ? null : (
-    <svg width={width} height={height}>
-      <Graph<CustomLink, CustomNode>
-        graph={graph}
-        top={30}
-        left={100}
-        nodeComponent={({node: {color}}) => (
-            color ? <DefaultNode r={20} fill={color} /> : <DefaultNode r={20} />
-        )}
-        linkComponent={({ link: { source, target } }) => (
-          <line
-            x1={source.x}
-            y1={source.y}
-            x2={target.x}
-            y2={target.y}
-            strokeWidth={2}
-            stroke="#999"
-            strokeOpacity={0.6}
-            // strokeDasharray={dashed ? '8,4' : undefined}
-          />
-        )}
-      />
-    </svg>
+    <Box>
+      {epoch[0] && (
+          <Epoch epoch={epoch} />
+      )}
+      <svg width={width} height={height}>
+        <Graph<CustomLink, CustomNode>
+          graph={graph}
+          top={30}
+          left={100}
+          nodeComponent={({node: {color}}) => (
+              color ? <DefaultNode r={20} fill={color} /> : <DefaultNode r={20} />
+          )}
+          linkComponent={({ link: { source, target } }) => (
+            <line
+              x1={source.x}
+              y1={source.y}
+              x2={target.x}
+              y2={target.y}
+              strokeWidth={2}
+              stroke="#999"
+              strokeOpacity={0.6}
+              // strokeDasharray={dashed ? '8,4' : undefined}
+            />
+          )}
+        />
+      </svg>
+    </Box>
   );
 }
