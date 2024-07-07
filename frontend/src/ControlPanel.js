@@ -99,7 +99,7 @@ export default function ControlPanel({handleTraining, setIsTraining, training, l
           variant="permanent"
           anchor="right"
       >
-        <Button variant="outlined" onClick={handleClickOpen}>
+        <Button onClick={handleClickOpen}>
           Set Training Data
         </Button>
         <Dialog open={open} onClose={handleClose}>
@@ -133,7 +133,7 @@ export default function ControlPanel({handleTraining, setIsTraining, training, l
                 margin="dense"
                 id="learningRate"
                 label="Learning Rate"
-                type="number"
+                type="float"
                 fullWidth
                 variant="standard"
                 value={learningRate}
