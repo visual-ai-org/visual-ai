@@ -4,10 +4,6 @@
 ## Problem Statement
 - **Track 7: On Unleashing Potential in Machine Learning Infrastructure**
 
-## Solution
-![img.png](img.png)
-We want to showcase how the perceptron update works in a Neural Network
-We built a simple Neural Network to show hwo 
 ## Requirements
 
 - Backend:
