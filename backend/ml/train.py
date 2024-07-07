@@ -10,6 +10,8 @@ class Train:
         self.update_callback = update_callback
 
     def train(self, X_train, y_train, epochs):
+        X_train = np.array(X_train)
+        y_train = np.array(y_train)
         for epoch in range(epochs):
             for x, y in zip(X_train, y_train):
                 self._train_single(x, y)
@@ -23,28 +25,11 @@ class Train:
                 self.update_callback(data)
 
     def _train_single(self, inp, targets):
-        targets = np.array(targets).flatten()
-        outputs = self.mlp.feed_forward(inp)
-
-        errors = [targets - outputs[-1]]
-        for i in range(len(self.mlp.layers) - 1, 0, -1):
-            weights = np.array([p.weights for p in self.mlp.layers[i].perceptrons])
-            errors.insert(0, np.dot(weights.T, errors[0]))
-
-        for i in range(len(self.mlp.layers)):
-            layer = self.mlp.layers[-1-i]
-            output = outputs[-1-i]
-            prev_output = outputs[-2-i]
-            gradient = np.multiply(errors[-1-i], Layer.derivative(output, layer.function))
-            gradient *= self.mlp.learning_rate
-            for j, p in enumerate(layer.perceptrons):
-                delta_w = np.dot(gradient[j], prev_output.T)
-                delta_b = gradient[j]
-                p.update_weights(delta_w, delta_b)
-                if self.update_callback:
-                    data = {
-                        "type": "weights",
-                        "weights": self.mlp.get_model_weights_json()
-                    }
-                    self.update_callback(data)
+        self.mlp.train(inp, targets)
+        if self.update_callback:
+            data = {
+                "type": "weights",
+                "weights": self.mlp.get_models_weight_json()
+            }
+            self.update_callback(data)
 

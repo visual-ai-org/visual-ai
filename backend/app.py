@@ -37,7 +37,7 @@ def add_layer():
         num_of_nodes = data['size']
         function = data['function']
         mlp.add_layer(num_of_nodes, function=function)
-        weights = mlp.get_model_weights_json()
+        weights = mlp.get_models_weight_json()
     except Exception as e:
         print(e)
         return jsonify({"message": str(e)}), 400
@@ -50,7 +50,7 @@ def set_input_size():
     data = request.json
     try:
         size = data['size']
-        mlp.input_size = size
+        mlp.number_of_nodes[0] = size
     except Exception as e:
         print(e)
         return jsonify({"message": str(e)}), 400
@@ -62,7 +62,7 @@ def set_input_size():
 def remove_layer():
     try:
         mlp.remove_layer()
-        return jsonify({"message": "Layer removed successfully", "weights": mlp.get_model_weights_json()}), 200
+        return jsonify({"message": "Layer removed successfully", "weights": mlp.get_models_weight_json()}), 200
     except Exception as e:
         print(e)
         return jsonify({"message": "Layer is empty"}), 200
