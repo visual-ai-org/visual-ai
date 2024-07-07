@@ -98,8 +98,8 @@ const App: React.FC = () => {
     });
 
     socket.emit('train', {
-      learning_rate: 0.02,
-      epochs: 100,
+      learning_rate: 0.2,
+      epochs: 200,
     });
 
     return () => {
