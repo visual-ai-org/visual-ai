@@ -114,6 +114,8 @@ const App: React.FC = () => {
         <div style={{flex: 1, width: '100vw', height: '100vw'}}>
           <IntroModal open={open} handleClose={handleClose}/>
           {/*<ApiComponent/>*/}
+
+          <Typography variant='h1' fontWeight={400} padding={5}> Start training your model! </Typography>
           <ParentSize>{({width, height}) =>
               <Network width={width} height={height}
                        layerPerceptronMap={items} epoch={epoch}

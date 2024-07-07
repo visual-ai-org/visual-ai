@@ -1,23 +1,25 @@
-import React, {useEffect, useState} from "react";
-import {DefaultNode, Graph} from "@visx/network";
-import {NetworkProps} from "./interface/NetworkProps";
-import {addLayer, remove_layer} from "./api";
-import {Box} from "@mui/material";
+
+import React, { useEffect, useState } from "react";
+import { DefaultNode, Graph } from "@visx/network";
+import { NetworkProps } from "./interface/NetworkProps";
+import { addLayer, remove_layer } from "./api";
+import { Box, Container, TextField, Typography } from "@mui/material";
 import Epoch from "./epoch";
-import {CustomLink} from "./interface/CustomLink";
-import {CustomNode} from "./interface/CustomNode";
-import {Weights} from "./interface/WeightObject";
-import {GraphProps} from "./interface/GraphProps";
+import { CustomLink } from "./interface/CustomLink";
+import { CustomNode } from "./interface/CustomNode";
+import { Weights } from "./interface/WeightObject";
+import { GraphProps } from "./interface/GraphProps";
+import "./node.css";
 
 // add layer
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   let r;
-  console.log("layersMap", layerPerceptronMap)
+  console.log("layersMap", layerPerceptronMap);
   for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
-    r = addLayer(perceptrons, "sigmoid")
+    r = addLayer(perceptrons, "sigmoid");
   }
-  return r
-}
+  return r;
+};
 
 // remove layer
 const resetBackend = async () => {
@@ -28,10 +30,10 @@ const resetBackend = async () => {
         break;
       }
     } catch (error) {
-      console.error('Error removing layer:', error);
+      console.error("Error removing layer:", error);
     }
   }
-}
+};
 
 const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] => {
   const newEdges = edges.map((edge, index) => {
@@ -98,7 +100,7 @@ const adjustColorIntensity = (color: string, value: number) => {
   const intensity = Math.min(1, 0.5 + value);
 
   // Parse the hex color
-  const hex = color.replace('#', '');
+  const hex = color.replace("#", "");
 
   // Convert to RGB
   const r = parseInt(hex.substring(0, 2), 16);
@@ -109,9 +111,9 @@ const adjustColorIntensity = (color: string, value: number) => {
   const adjust = (channel: number) => Math.round(channel * intensity);
 
   // Convert back to hex
-  const newR = adjust(r).toString(16).padStart(2, '0');
-  const newG = adjust(g).toString(16).padStart(2, '0');
-  const newB = adjust(b).toString(16).padStart(2, '0');
+  const newR = adjust(r).toString(16).padStart(2, "0");
+  const newG = adjust(g).toString(16).padStart(2, "0");
+  const newB = adjust(b).toString(16).padStart(2, "0");
 
   return `#${newR}${newG}${newB}`;
 };
@@ -124,8 +126,6 @@ export default function Network({
   epoch,
   training
 }: NetworkProps) {
-
-  // TODO: figure out how to store the links and nodes from the map
   const [nodes, setNodes] = useState<CustomNode[]>([]);
   const [edges, setEdges] = useState<CustomLink[]>([]);
   const [graph, setGraph] = useState<GraphProps>();
@@ -158,23 +158,29 @@ export default function Network({
   const getNodes = (layerPerceptronMap: Map<number, number>) => {
     const result: CustomNode[] = [];
     var x: number = 100;
-    const length = layerPerceptronMap.size
-    console.log("len", length)
+    const length = layerPerceptronMap.size;
+    console.log("len", length);
     for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
-      var y = 600 / (perceptrons + 1)
-      var interval = 600 / (perceptrons + 1)
+      var y = 600 / (perceptrons + 1);
+      var interval = 600 / (perceptrons + 1);
       for (let i = 0; i < perceptrons; i++) {
-        const node: CustomNode = { x: x, y: y, value: 1, layer: layer, index: i };
+        const node: CustomNode = {
+          x: x,
+          y: y,
+          value: 1,
+          layer: layer,
+          index: i,
+        };
         if (layer == 1) {
           // input
-          node.color = "#FF6666"
-          node.size = 16
+          node.color = "#FF6666";
+          node.size = 16;
         } else if (layer >= length) {
           // output
-          node.color = "#64ff64"
-          node.size = 16
+          node.color = "#64ff64";
+          node.size = 16;
         } else {
-          node.color = "#448cfd"
+          node.color = "#448cfd";
         }
 
         result.push(node);
@@ -185,7 +191,10 @@ export default function Network({
     return result;
   };
 
-  const getEdges = (layerPerceptronMap: Map<number, number>, nodes: CustomNode[]) => {
+  const getEdges = (
+    layerPerceptronMap: Map<number, number>,
+    nodes: CustomNode[]
+  ) => {
     const result: CustomLink[] = [];
     const layerPerceptrons = Array.from(layerPerceptronMap.entries());
 
@@ -206,7 +215,7 @@ export default function Network({
             sourceLayer: source.layer,
             targetLayer: target.layer,
             sourceIndex: source.index,
-            targetIndex: target.index
+            targetIndex: target.index,
           };
           result.push(newLink);
         }
@@ -215,7 +224,7 @@ export default function Network({
       prevLayer = nextLayer;
     }
     return result;
-  }
+  };
 
   useEffect(() => {
     setNodes(getNodes(layerPerceptronMap));
@@ -245,8 +254,8 @@ export default function Network({
 
   useEffect(() => {
     if (weights[0]) {
-      setEdges(updateEdgeValue(edges, weights[0].data.weights))
-      setNodes(updateNodeValue(nodes, weights[0].data.weights))
+      setEdges(updateEdgeValue(edges, weights[0].data.weights));
+      setNodes(updateNodeValue(nodes, weights[0].data.weights));
     }
   }, [weights]);
 
@@ -255,22 +264,76 @@ export default function Network({
     setGraph({nodes: nodes, links: edges});
   }, [edges, nodes]);
 
+  const ShadowFilter = () => (
+    <svg width="0" height="0">
+      <defs>
+        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow
+            dx="3"
+            dy="3"
+            stdDeviation="3"
+            floodColor="rgba(0,0,0,0.5)"
+          />
+        </filter>
+      </defs>
+    </svg>
+  );
+
+  const NodeWrapper: React.FC<NodeWrapperProps> = ({ r, fill }) => {
+    const [hovered, setHovered] = useState(false);
+
+    const handleMouseOver = () => {
+      setHovered(true);
+    };
+
+    const handleMouseOut = () => {
+      setHovered(false);
+    };
+
+    return (
+      <g onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+        <DefaultNode
+          r={r}
+          fill={fill}
+          style={{
+            filter: "url(#shadow)",
+            transform: hovered ? "scale(1.5)" : "scale(1)",
+            transition: "transform 0.2s ease-out",
+          }}
+        />
+      </g>
+    );
+  };
+
   return width < 10 ? null : (
     <Box>
-      {epoch[0] && (
-          <Epoch epoch={epoch} />
-      )}
+      {epoch[0] && <Epoch epoch={epoch} />}
       <svg width={width} height={height}>
         <Graph<CustomLink, CustomNode>
           graph={graph}
           top={30}
           left={100}
-          nodeComponent={({node: {color, value, size}}) => {
-            const adjustedColor = color ? adjustColorIntensity(color, value) : '#ffffff';
-            return <DefaultNode r={size ? size : 20} fill={adjustedColor} />;
+          nodeComponent={({ node: { color, value, size } }) => {
+            const adjustedColor = color
+              ? adjustColorIntensity(color, value)
+              : "#ffffff";
+            return (
+              <g className="oscillate">
+                <ShadowFilter />
+                <NodeWrapper r={size ? size : 20} fill={adjustedColor} />
+                {/* <DefaultNode
+                  r={size ? size : 20}
+                  fill={adjustedColor}
+                  style={{
+                    filter: "url(#shadow)",
+                  }}
+                /> */}
+              </g>
+            );
           }}
           linkComponent={({ link: { source, target, value } }) => (
             <line
+              className="oscillate"
               x1={source.x}
               y1={source.y}
               x2={target.x}

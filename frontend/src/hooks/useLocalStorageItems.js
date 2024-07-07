@@ -6,7 +6,7 @@ function getLocalStorageItems() {
   var layerObject = JSON.parse(layerInfo);
   if (layerObject == null) {
     // for new users, start with 2 layers by default
-    layerObject = {1: 1, 2: 1};
+    layerObject = {1: 2, 2: 1};
     const newLayerInfo = JSON.stringify(layerObject);
     localStorage.setItem("layers", newLayerInfo);
   }
