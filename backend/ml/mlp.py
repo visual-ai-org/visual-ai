@@ -164,16 +164,13 @@ class Mlp:
                     'bias': b.item()  # Convert to scalar for JSON serialization
                 }
             model_weights[f'layer {i}'] = layer_weights
-        return json.dumps(model_weights, indent=4)
+        return model_weights
 
     def remove_layer(self):
-            if len(self.number_of_nodes) > 1:
-                self.number_of_nodes.pop()
-                self.weights.pop()
-                self.biases.pop()
-                self.functions.pop()
-            else:
-                print("Cannot remove the initial layer.")
+        self.number_of_nodes.pop()
+        self.weights.pop()
+        self.biases.pop()
+        self.functions.pop()
 
     def get_loss(self, inputs, targets):
         targets = np.matrix(targets).T

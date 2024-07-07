@@ -11,6 +11,7 @@ import {GraphProps} from "./interface/GraphProps";
 
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   let r;
+  console.log("layersMap", layerPerceptronMap)
   for (const [layer, perceptrons] of layerPerceptronMap.entries()) {
     r = addLayer(perceptrons, "sigmoid")
   }
