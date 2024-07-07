@@ -3,8 +3,9 @@ import math
 import numpy as np
 
 class Perceptron:
-    def __init__(self, input_size: int, function: str = "sigmoid"):
-        self.weights = np.random.randn(input_size) * np.sqrt(2 / input_size)
+    def __init__(self, row_size: int, col_size: int, function: str = "sigmoid"):
+        self.weights = np.random.randn(row_size, col_size) * np.sqrt(2 / row_size + col_size)
+        # print(self.weights)
         self.bias = np.random.uniform(0, 0)
         self.function = function
 
@@ -30,9 +31,13 @@ class Perceptron:
             return Perceptron.relu(x)
 
     def activate(self, x):
+        print(self.weights.shape,
+              x.shape)
         z = np.dot(self.weights, x) + self.bias
         return Perceptron.squash(z, self.function)
 
     def update_weights(self, delta_w, delta_b):
+        print("delta w", delta_w)
+        print(self.weights)
         self.weights += delta_w
         self.bias += delta_b

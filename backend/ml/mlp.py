@@ -15,8 +15,17 @@ class Mlp:
             self.input_size = init_nodes
 
     def add_layer(self, number_of_nodes: int, function="sigmoid"):
-        input_size = self.layers[-1].perceptrons[0].weights.size if self.layers else self.input_size
-        self.layers.append(Layer(number_of_nodes, input_size, function))
+        row_size = number_of_nodes
+        if self.layers:
+            col_size = self.layers[-1].row_size
+        else:
+            col_size = self.input_size
+        self.layers.append(Layer(number_of_nodes, row_size, col_size, function))
+
+        for layer in self.layers:
+            print("nodes", layer.num_of_nodes, layer.perceptrons[0].weights.shape)
+        print()
+
 
     def get_model_weights(self):
         model_weights = {}
@@ -50,9 +59,10 @@ class Mlp:
         return total_loss / len(X)
 
     def feed_forward(self, inp):
-        outputs = [np.array(inp)]
+        outputs = [np.matrix(inp).T]
         for layer in self.layers:
-            outputs.append(layer.forward(outputs[-1]))
+            outputs = layer.forward(outputs)
+            print("outputs", outputs)
         return outputs
 
     def predict(self, inp):

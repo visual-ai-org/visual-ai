@@ -35,10 +35,11 @@ class Train:
             layer = self.mlp.layers[-1-i]
             output = outputs[-1-i]
             prev_output = outputs[-2-i]
-            gradient = np.multiply(errors[-1-i], Layer.derivative(output, layer.perceptrons[0].function))
+            gradient = np.multiply(errors[-1-i], Layer.derivative(output, layer.function))
+            gradient *= self.mlp.learning_rate
             for j, p in enumerate(layer.perceptrons):
-                delta_w = self.mlp.learning_rate * gradient[j] * prev_output
-                delta_b = self.mlp.learning_rate * gradient[j]
+                delta_w = np.dot(gradient[j], prev_output.T)
+                delta_b = gradient[j]
                 p.update_weights(delta_w, delta_b)
                 if self.update_callback:
                     data = {
