@@ -45,7 +45,7 @@ export default function Perceptron({ isExpanded, layerNumber }) {
   };
 
   const handleRemoveClick = () => {
-    if (perceptronNum > 1) {
+    if ((layerNumber !== 1 && perceptronNum > 1) || (layerNumber === 1 && perceptronNum > 2)) {
       removePerceptronFromStorage(layerNumber);
       window.dispatchEvent(new Event("storage"));
       setPerceptronNum(perceptronNum - 1);

@@ -6,5 +6,6 @@ export interface CustomNode {
     layer: number;
     index: number;
     size?: number;
+    hovered?: true;
 }
 
