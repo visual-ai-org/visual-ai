@@ -1,13 +1,13 @@
 import {
-  Button,
-  DialogContent,
+  Button, Dialog, DialogActions,
+  DialogContent, DialogContentText, DialogTitle,
   Divider,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Stack,
+  Stack, TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -18,12 +18,36 @@ import { useEffect, useState } from "react";
 import Perceptron from "./Perceptron";
 import Layer from "./Layer";
 import {setTrainData} from "./api";
+import epoch from "./epoch";
 
 const drawerWidth = 400;
 const layerLimit = 6;
 
-export default function ControlPanel({handleTraining, setIsTraining, training}) {
+export default function ControlPanel({handleTraining, setIsTraining, training, learningRate, epochs, setLearningRate, setEpochs}) {
   const [layers, setLayers] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [trainData, setTrainDataInput] = useState('[[0, 0], [0, 1], [1, 0], [1, 1]]');
+  const [labels, setLabelsInput] = useState('[[0], [1], [1], [0]]');
+
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSubmit = () => {
+    // Convert the input strings to arrays and numbers
+    const parsedTrainData = JSON.parse(trainData);
+    const parsedLabels = JSON.parse(labels);
+
+    setTrainData(parsedTrainData, parsedLabels);
+    setIsTraining(true);
+    console.log("backend shouldn't update", training);
+    handleClose();
+  };
 
   useEffect(() => {
     const layersObj = JSON.parse(localStorage.getItem("layers"));
@@ -63,59 +87,108 @@ export default function ControlPanel({handleTraining, setIsTraining, training}) 
   };
 
   return (
-    <Drawer
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
-        },
-      }}
-      variant="permanent"
-      anchor="right"
-    >
-      <Button
-          onClick={() => {
-            setTrainData([[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]])
-            setIsTraining(true)
-            console.log("backend shouldn't update", training)
+      <Drawer
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              boxSizing: "border-box",
+            },
           }}
+          variant="permanent"
+          anchor="right"
       >
-        Set Training Data
-      </Button>
-      <DialogContent>
-        <Toolbar variant="regular">
-          <Typography variant="h7" color="inherit" component="div">
-            Configure layers and perceptrons
-          </Typography>
-        </Toolbar>
-        <Divider />
-        <List>
-          {Array.from({ length: layers }, (_, index) => (
-            <Layer index={index} lastIndex={layers - 1}> </Layer>
-          ))}
+        <div>
+          <Button variant="outlined" onClick={handleClickOpen}>
+            Set Training Data
+          </Button>
+          <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>Set Training Data</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Please enter the training data and labels in JSON format, as well as the learning rate and epochs.
+              </DialogContentText>
+              <TextField
+                  autoFocus
+                  margin="dense"
+                  id="trainData"
+                  label="Training Data"
+                  type="text"
+                  fullWidth
+                  variant="standard"
+                  value={trainData}
+                  onChange={(e) => setTrainDataInput(e.target.value)}
+              />
+              <TextField
+                  margin="dense"
+                  id="labels"
+                  label="Labels"
+                  type="text"
+                  fullWidth
+                  variant="standard"
+                  value={labels}
+                  onChange={(e) => setLabelsInput(e.target.value)}
+              />
+              <TextField
+                  margin="dense"
+                  id="learningRate"
+                  label="Learning Rate"
+                  type="number"
+                  fullWidth
+                  variant="standard"
+                  value={learningRate}
+                  onChange={(e) => setLearningRate(e.target.value)}
+              />
+              <TextField
+                  margin="dense"
+                  id="epochs"
+                  label="Epochs"
+                  type="number"
+                  fullWidth
+                  variant="standard"
+                  value={epochs}
+                  onChange={(e) => setEpochs(e.target.value)}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose}>Cancel</Button>
+              <Button onClick={handleSubmit}>Submit</Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+        <DialogContent>
+          <Toolbar variant="regular">
+            <Typography variant="h7" color="inherit" component="div">
+              Configure layers and perceptrons
+            </Typography>
+          </Toolbar>
+          <Divider/>
+          <List>
+            {Array.from({length: layers}, (_, index) => (
+                <Layer index={index} lastIndex={layers - 1}> </Layer>
+            ))}
+          </List>
+        </DialogContent>
+        <List
+            style={{position: "absolute", bottom: "0"}}
+            component={Stack}
+            direction={"row"}
+            spacing={"130px"}
+            sx={{padding: "50px"}}
+        >
+          <ListItemButton onClick={handleAddClick}>
+            <ListItemIcon>
+              <AddIcon fontSize="large"/>
+            </ListItemIcon>
+          </ListItemButton>
+          <ListItemButton onClick={handleRemoveClick}>
+            <RemoveIcon fontSize="large"/>
+          </ListItemButton>
         </List>
-      </DialogContent>
-      <List
-        style={{ position: "absolute", bottom: "0" }}
-        component={Stack}
-        direction={"row"}
-        spacing={"130px"}
-        sx={{ padding: "50px" }}
-      >
-        <ListItemButton onClick={handleAddClick}>
-          <ListItemIcon>
-            <AddIcon fontSize="large" />
-          </ListItemIcon>
-        </ListItemButton>
-        <ListItemButton onClick={handleRemoveClick}>
-          <RemoveIcon fontSize="large" />
-        </ListItemButton>
-      </List>
-      <Button onClick={handleTraining}>
-        Start Training
-      </Button>
-    </Drawer>
+        <Button onClick={handleTraining}>
+          Start Training
+        </Button>
+      </Drawer>
   );
 }

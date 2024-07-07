@@ -20,6 +20,8 @@ const App: React.FC = () => {
   const [weights, setWeights] = useState([]);
   const [epoch, setEpoch] = useState([])
   const [isTraining, setIsTraining] = useState(false)
+  const [learningRate, setLearningRate] = useState(0.2);
+  const [epochs, setEpochs] = useState(200);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -98,8 +100,8 @@ const App: React.FC = () => {
     });
 
     socket.emit('train', {
-      learning_rate: 0.2,
-      epochs: 200,
+      learning_rate: learningRate,
+      epochs: epochs,
     });
 
     return () => {
@@ -117,10 +119,19 @@ const App: React.FC = () => {
 
           <Typography variant='h1' fontWeight={400} padding={5}> Start training your model! </Typography>
           <ParentSize>{({width, height}) =>
-              <Network width={width} height={height}
-                       layerPerceptronMap={items} epoch={epoch}
-                       weights={weights} training={isTraining}/>}</ParentSize>
-          <ControlPanel handleTraining={handleTraining} setIsTraining={setIsTraining} training={isTraining}/>
+              <Network width={width}
+                       height={height}
+                       layerPerceptronMap={items}
+                       epoch={epoch}
+                       weights={weights}
+                       training={isTraining}/>}</ParentSize>
+          <ControlPanel handleTraining={handleTraining}
+                        setIsTraining={setIsTraining}
+                        training={isTraining}
+                        learningRate={learningRate}
+                        epochs={epochs}
+                        setLearningRate={setLearningRate}
+                        setEpochs={setEpochs}/>
         </div>
         <div>
           <h2>Weights Updates</h2>
