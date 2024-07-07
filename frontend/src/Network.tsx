@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {DefaultNode, Graph} from "@visx/network";
 import {NetworkProps} from "./interface/NetworkProps";
 import {addLayer, remove_layer} from "./api";
-import {Box, Container, TextField, Typography} from "@mui/material";
+import {Box} from "@mui/material";
 import Epoch from "./epoch";
 import {CustomLink} from "./interface/CustomLink";
 import {CustomNode} from "./interface/CustomNode";
@@ -44,9 +44,15 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
 
     // Log the keys to debug
     console.log(`Layer: ${sourceLayerKey} -> ${targetLayerKey}, perceptron: ${perceptronKey}`);
-
+    console.log(`Weights: ${JSON.stringify(weights)}`)
+    // if it is input node
+    if (sourceLayer === 1) {
+      const perceptronWeights = weights[sourceLayerKey]['perceptron 0'].weights;
+      edge.value = perceptronWeights[Number(sourceIndex)]
+    }
     // Check if the keys exist
-    if (weights[sourceLayerKey] && weights[sourceLayerKey][perceptronKey]) {
+    else if (weights[sourceLayerKey]
+        && weights[sourceLayerKey][perceptronKey]) {
       const perceptronWeights = weights[sourceLayerKey][perceptronKey].weights;
       const weightIndex = targetLayer - sourceLayer - 1;
 
@@ -79,7 +85,10 @@ const updateNodeValue = (nodes: CustomNode[], weights: Weights): CustomNode[] =>
     const perceptronKey = `perceptron ${index}`;
 
     //@ts-ignore
-    if (layerKey >= 0 && weights[layerKey]) {
+    if (layer == 0) {
+      node.value = 1
+    }
+    else if (layer > 0 && weights[layerKey] && weights[layerKey][perceptronKey]) {
       node.value = weights[layerKey][perceptronKey].bias
     } else {
       console.error(`Invalid layer index: ${layerKey}`)
