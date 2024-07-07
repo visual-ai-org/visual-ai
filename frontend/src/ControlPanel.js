@@ -33,6 +33,7 @@ export default function ControlPanel({
   training,
   learningRate,
   epochs,
+  epoch,
   setLearningRate,
   setEpochs,
 }) {
@@ -204,7 +205,7 @@ export default function ControlPanel({
         </ListItemButton>
       </List>
       <Button onClick={handleTraining}>Start Training</Button>
-      {!training ? <Button onClick={handleRefresh}>Refresh</Button> : null}
+      <Button onClick={handleRefresh}>Refresh</Button>
     </Drawer>
   );
 }

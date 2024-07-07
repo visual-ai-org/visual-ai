@@ -127,6 +127,7 @@ const App: React.FC = () => {
                         setIsTraining={setIsTraining}
                         training={isTraining}
                         learningRate={learningRate}
+                        epoch={epoch}
                         epochs={epochs}
                         setLearningRate={setLearningRate}
                         setEpochs={setEpochs}/>
