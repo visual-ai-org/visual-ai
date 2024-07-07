@@ -43,7 +43,7 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
     const perceptronKey = `perceptron ${sourceIndex}`;
 
     // Log the keys to debug
-    console.log(`sourceLayerKey: ${sourceLayerKey}, targetLayerKey: ${targetLayerKey}, perceptronKey: ${perceptronKey}`);
+    console.log(`Layer: ${sourceLayerKey} -> ${targetLayerKey}, perceptron: ${perceptronKey}`);
 
     // Check if the keys exist
     if (weights[sourceLayerKey] && weights[sourceLayerKey][perceptronKey]) {
@@ -58,10 +58,10 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
         edge.value = perceptronWeights[weightIndex];
         console.log(`Updated edge value to ${edge.value}`)
       } else {
-        console.error(`Invalid weight index: ${weightIndex} for sourceLayer ${sourceLayer}, targetLayer ${targetLayer}`);
+        console.error(`Invalid weight index: ${weightIndex} for layer ${sourceLayerKey} -> ${targetLayerKey}`);
       }
     } else {
-      console.error(`Invalid keys: sourceLayerKey = ${sourceLayerKey}, targetLayerKey = ${targetLayerKey}, perceptronKey = ${perceptronKey}`);
+      console.error(`Invalid keys: Layer ${sourceLayerKey} -> ${targetLayerKey}, perceptron: ${perceptronKey}`);
     }
 
     return { ...edge};
@@ -79,7 +79,11 @@ const updateNodeValue = (nodes: CustomNode[], weights: Weights): CustomNode[] =>
     const perceptronKey = `perceptron ${index}`;
 
     //@ts-ignore
-    node.value = weights[layerKey][perceptronKey].bias
+    if (layerKey >= 0 && weights[layerKey]) {
+      node.value = weights[layerKey][perceptronKey].bias
+    } else {
+      console.error(`Invalid layer index: ${layerKey}`)
+    }
 
     return { ...node}
   });
