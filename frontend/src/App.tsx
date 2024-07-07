@@ -94,7 +94,6 @@ const App: React.FC = () => {
     })
 
     socket.on('training_complete', (data) => {
-      setIsTraining(false)
       console.log('Training complete!');
     });
 
@@ -106,6 +105,7 @@ const App: React.FC = () => {
     return () => {
       socket.disconnect();
       console.log('Disconnected from server');
+      setIsTraining(false)
     }
   };
 
@@ -114,9 +114,11 @@ const App: React.FC = () => {
         <div style={{flex: 1, width: '100vw', height: '100vw'}}>
           <IntroModal open={open} handleClose={handleClose}/>
           {/*<ApiComponent/>*/}
-          <ParentSize>{({width, height}) => <Network width={width} height={height}
-                                                     layerPerceptronMap={items} epoch={epoch} weights={weights} training={isTraining}/>}</ParentSize>
-          <ControlPanel handleTraining={handleTraining} setIsTraining={setIsTraining}/>
+          <ParentSize>{({width, height}) =>
+              <Network width={width} height={height}
+                       layerPerceptronMap={items} epoch={epoch}
+                       weights={weights} training={isTraining}/>}</ParentSize>
+          <ControlPanel handleTraining={handleTraining} setIsTraining={setIsTraining} training={isTraining}/>
         </div>
         <div>
           <h2>Weights Updates</h2>

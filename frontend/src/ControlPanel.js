@@ -22,7 +22,7 @@ import {setTrainData} from "./api";
 const drawerWidth = 400;
 const layerLimit = 6;
 
-export default function ControlPanel({handleTraining, setIsTraining}) {
+export default function ControlPanel({handleTraining, setIsTraining, training}) {
   const [layers, setLayers] = useState(0);
 
   useEffect(() => {
@@ -79,6 +79,7 @@ export default function ControlPanel({handleTraining, setIsTraining}) {
           onClick={() => {
             setTrainData([[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]])
             setIsTraining(true)
+            console.log("backend shouldn't update", training)
           }}
       >
         Set Training Data

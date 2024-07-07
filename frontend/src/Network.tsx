@@ -227,7 +227,7 @@ export default function Network({
   }, [layerPerceptronMap]);
 
   useEffect(() => {
-    console.log("backend update")
+    console.log("backend update", training)
     if (!training) {
       resetBackend().then(r =>
           setBackend(layerPerceptronMap).then(
