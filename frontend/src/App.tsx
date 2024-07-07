@@ -100,8 +100,8 @@ const App: React.FC = () => {
     });
 
     socket.emit('train', {
-      learning_rate: learningRate,
-      epochs: epochs,
+      learning_rate: Number(learningRate),
+      epochs: Number(epochs),
     });
 
     return () => {

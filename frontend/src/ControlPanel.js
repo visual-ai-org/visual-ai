@@ -99,64 +99,62 @@ export default function ControlPanel({handleTraining, setIsTraining, training, l
           variant="permanent"
           anchor="right"
       >
-        <div>
-          <Button variant="outlined" onClick={handleClickOpen}>
-            Set Training Data
-          </Button>
-          <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Set Training Data</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Please enter the training data and labels in JSON format, as well as the learning rate and epochs.
-              </DialogContentText>
-              <TextField
-                  autoFocus
-                  margin="dense"
-                  id="trainData"
-                  label="Training Data"
-                  type="text"
-                  fullWidth
-                  variant="standard"
-                  value={trainData}
-                  onChange={(e) => setTrainDataInput(e.target.value)}
-              />
-              <TextField
-                  margin="dense"
-                  id="labels"
-                  label="Labels"
-                  type="text"
-                  fullWidth
-                  variant="standard"
-                  value={labels}
-                  onChange={(e) => setLabelsInput(e.target.value)}
-              />
-              <TextField
-                  margin="dense"
-                  id="learningRate"
-                  label="Learning Rate"
-                  type="number"
-                  fullWidth
-                  variant="standard"
-                  value={learningRate}
-                  onChange={(e) => setLearningRate(e.target.value)}
-              />
-              <TextField
-                  margin="dense"
-                  id="epochs"
-                  label="Epochs"
-                  type="number"
-                  fullWidth
-                  variant="standard"
-                  value={epochs}
-                  onChange={(e) => setEpochs(e.target.value)}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
-              <Button onClick={handleSubmit}>Submit</Button>
-            </DialogActions>
-          </Dialog>
-        </div>
+        <Button variant="outlined" onClick={handleClickOpen}>
+          Set Training Data
+        </Button>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Set Training Data</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Please enter the training data and labels in JSON format, as well as the learning rate and epochs.
+            </DialogContentText>
+            <TextField
+                autoFocus
+                margin="dense"
+                id="trainData"
+                label="Training Data"
+                type="text"
+                fullWidth
+                variant="standard"
+                value={trainData}
+                onChange={(e) => setTrainDataInput(e.target.value)}
+            />
+            <TextField
+                margin="dense"
+                id="labels"
+                label="Labels"
+                type="text"
+                fullWidth
+                variant="standard"
+                value={labels}
+                onChange={(e) => setLabelsInput(e.target.value)}
+            />
+            <TextField
+                margin="dense"
+                id="learningRate"
+                label="Learning Rate"
+                type="number"
+                fullWidth
+                variant="standard"
+                value={learningRate}
+                onChange={(e) => setLearningRate(e.target.value)}
+            />
+            <TextField
+                margin="dense"
+                id="epochs"
+                label="Epochs"
+                type="number"
+                fullWidth
+                variant="standard"
+                value={epochs}
+                onChange={(e) => setEpochs(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleSubmit}>Submit</Button>
+          </DialogActions>
+        </Dialog>
         <DialogContent>
           <Toolbar variant="regular">
             <Typography variant="h7" color="inherit" component="div">
