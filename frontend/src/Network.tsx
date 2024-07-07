@@ -1,16 +1,16 @@
-
 import React, { useEffect, useState } from "react";
 import { DefaultNode, Graph } from "@visx/network";
 import { NetworkProps } from "./interface/NetworkProps";
 import { addLayer, remove_layer } from "./api";
-import { Box, Container, TextField, Typography } from "@mui/material";
+import { Box, Container, TextField, Tooltip, Typography } from "@mui/material";
 import Epoch from "./epoch";
 import { CustomLink } from "./interface/CustomLink";
 import { CustomNode } from "./interface/CustomNode";
 import { Weights } from "./interface/WeightObject";
 import { GraphProps } from "./interface/GraphProps";
 import { NodeWrapperProps } from "./interface/NodeWrapper";
-import "./node.css";
+import "./NodeWrapper.css";
+import { LineWrapperProps } from "./interface/LineWrapperProps";
 
 // add layer
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
@@ -36,7 +36,10 @@ const resetBackend = async () => {
   }
 };
 
-const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] => {
+const updateEdgeValue = (
+  edges: CustomLink[],
+  weights: Weights
+): CustomLink[] => {
   const newEdges = edges.map((edge, index) => {
     // Frontend layer indices are 1, 2, 3; backend layers are 0, 1
     // Mapping frontend layer indices to backend layer indices
@@ -56,7 +59,8 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
     // Check if the source layer and perceptron exist in weights
     if (weights[sourceLayerKey] && weights[sourceLayerKey][perceptronKey]) {
       // Get the weight corresponding to the target index
-      const weight = weights[sourceLayerKey][perceptronKey].weights[sourceIndex];
+      const weight =
+        weights[sourceLayerKey][perceptronKey].weights[sourceIndex];
       // console.log(`Weight found: ${weight}`);
       // Update the edge value
       return { ...edge, value: weight };
@@ -71,7 +75,10 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
   return newEdges;
 };
 
-const updateNodeValue = (nodes: CustomNode[], weights: Weights): CustomNode[] => {
+const updateNodeValue = (
+  nodes: CustomNode[],
+  weights: Weights
+): CustomNode[] => {
   const newNodes = nodes.map((node, index) => {
     const layer = node.layer - 2; // Adjusting the layer to match backend indexing
     const perceptronIndex = node.index;
@@ -87,7 +94,7 @@ const updateNodeValue = (nodes: CustomNode[], weights: Weights): CustomNode[] =>
       node.value = weights[layerKey][perceptronKey].bias;
       console.log(`Bias found: ${node.value}`);
     } else {
-      node.value = 1
+      node.value = 1;
     }
 
     return { ...node };
@@ -125,12 +132,14 @@ export default function Network({
   layerPerceptronMap,
   weights,
   epoch,
-  training
+  training,
 }: NetworkProps) {
   const [nodes, setNodes] = useState<CustomNode[]>([]);
   const [edges, setEdges] = useState<CustomLink[]>([]);
   const [graph, setGraph] = useState<GraphProps>();
-  const [triggerBackend, setTriggerBackend] = useState<Boolean>(false)
+  const [triggerBackend, setTriggerBackend] = useState<Boolean>(false);
+  const [mouseX, setMouseX] = useState<number>(0);
+  const [mouseY, setMouseY] = useState<number>(0);
   // let prevLayers: Map<number, number>;
 
   // const checkSameLayers = (prevLayers: Map<number, number>, newLayers: Map<number, number>): boolean => {
@@ -229,30 +238,28 @@ export default function Network({
 
   useEffect(() => {
     if (!training) {
-      const nodes = getNodes(layerPerceptronMap)
+      const nodes = getNodes(layerPerceptronMap);
       setNodes(nodes);
       setEdges(getEdges(layerPerceptronMap, nodes));
       // if (prevLayers && checkSameLayers(prevLayers, layerPerceptronMap)) {
-      setTriggerBackend(!triggerBackend)
+      setTriggerBackend(!triggerBackend);
       // }
       // prevLayers = layerPerceptronMap
     }
   }, [layerPerceptronMap]);
 
   useEffect(() => {
-    console.log("backend update", training)
+    console.log("backend update", training);
     if (!training) {
-      resetBackend().then(r =>
-          setBackend(layerPerceptronMap).then(
-              r => {
-                // if (checkLayersSize(layerPerceptronMap, r.weights.size)) {
-                //   setTriggerBackend(!triggerBackend)
-                //   return
-                // }
-                setEdges(updateEdgeValue(edges, r.weights))
-              }
-          )
-      )
+      resetBackend().then((r) =>
+        setBackend(layerPerceptronMap).then((r) => {
+          // if (checkLayersSize(layerPerceptronMap, r.weights.size)) {
+          //   setTriggerBackend(!triggerBackend)
+          //   return
+          // }
+          setEdges(updateEdgeValue(edges, r.weights));
+        })
+      );
     }
   }, [triggerBackend]);
 
@@ -264,8 +271,8 @@ export default function Network({
   }, [weights]);
 
   useEffect(() => {
-    console.log("edges network", edges)
-    setGraph({nodes: nodes, links: edges});
+    console.log("edges network", edges);
+    setGraph({ nodes: nodes, links: edges });
   }, [edges, nodes]);
 
   const ShadowFilter = () => (
@@ -283,7 +290,7 @@ export default function Network({
     </svg>
   );
 
-  const NodeWrapper: React.FC<NodeWrapperProps> = ({ r, fill }) => {
+  const NodeWrapper: React.FC<NodeWrapperProps> = ({ r, fill, biasValue }) => {
     const [hovered, setHovered] = useState(false);
 
     const handleMouseOver = () => {
@@ -295,24 +302,74 @@ export default function Network({
     };
 
     return (
-      <g onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
-        <DefaultNode
-          r={r}
-          fill={fill}
-          style={{
-            filter: "url(#shadow)",
-            transform: hovered ? "scale(1.5)" : "scale(1)",
-            transition: "transform 0.2s ease-out",
-          }}
-        />
-      </g>
+      <Tooltip title={`Bias value: ${biasValue}`} arrow>
+        <g
+          className={`node-wrapper ${hovered ? "hovered" : ""}`}
+          onMouseOver={handleMouseOver}
+          onMouseOut={handleMouseOut}
+        >
+          <DefaultNode
+            r={r}
+            fill={fill}
+            style={{
+              filter: "url(#shadow)",
+              transform: hovered ? "scale(1.5)" : "scale(1)",
+              transition: "transform 0.2s ease-out",
+            }}
+          />
+        </g>
+      </Tooltip>
     );
+  };
+
+  const LineWrapper: React.FC<LineWrapperProps> = ({
+    source,
+    target,
+    value,
+  }) => {
+    const [hovered, setHovered] = useState(false);
+
+    const handleMouseOver = () => {
+      setHovered(true);
+    };
+
+    const handleMouseOut = () => {
+      setHovered(false);
+    };
+
+    return (
+      <Tooltip
+        title={`Weight: ${value}`}
+        style={{
+          position: "absolute",
+          left: mouseX,
+          top: mouseY,
+        }}
+      >
+        <g onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+          <line
+            x1={source.x}
+            y1={source.y}
+            x2={target.x}
+            y2={target.y}
+            strokeWidth={hovered ? 10 : 5 + Number(value) * 3}
+            stroke={hovered ? "#f00" : "#999"}
+            strokeOpacity={0.6}
+          />
+        </g>
+      </Tooltip>
+    );
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    setMouseX(event.pageX);
+    setMouseY(event.pageY);
   };
 
   return width < 10 ? null : (
     <Box>
       {epoch[0] && <Epoch epoch={epoch} />}
-      <svg width={width} height={height}>
+      <svg width={width} height={height} onMouseMove={handleMouseMove}>
         <Graph<CustomLink, CustomNode>
           graph={graph}
           top={30}
@@ -322,9 +379,13 @@ export default function Network({
               ? adjustColorIntensity(color, value)
               : "#ffffff";
             return (
-              <g className="oscillate">
+              <g>
                 <ShadowFilter />
-                <NodeWrapper r={size ? size : 20} fill={adjustedColor} />
+                <NodeWrapper
+                  r={size ? size : 20}
+                  fill={adjustedColor}
+                  biasValue={value}
+                />
                 {/* <DefaultNode
                   r={size ? size : 20}
                   fill={adjustedColor}
@@ -336,17 +397,25 @@ export default function Network({
             );
           }}
           linkComponent={({ link: { source, target, value } }) => (
-            <line
-              className="oscillate"
-              x1={source.x}
-              y1={source.y}
-              x2={target.x}
-              y2={target.y}
-              strokeWidth={5 + Number(value) * 3}
-              stroke="#999"
-              strokeOpacity={0.6}
-              // strokeDasharray={dashed ? '8,4' : undefined}
-            />
+            // <Tooltip
+            //   title={`Weight: ${value}`}
+            //   style={{
+            //     position: "absolute",
+            //     left: mouseX,
+            //     top: mouseY,
+            //   }}
+            // >
+            //   <line
+            //     x1={source.x}
+            //     y1={source.y}
+            //     x2={target.x}
+            //     y2={target.y}
+            //     strokeWidth={5 + Number(value) * 3}
+            //     stroke="#999"
+            //     strokeOpacity={0.6}
+            //   />
+            // </Tooltip>
+            <LineWrapper source={source} target={target} value={value}/>
           )}
         />
       </svg>
