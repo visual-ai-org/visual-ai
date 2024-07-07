@@ -15,10 +15,8 @@ import Drawer from "@mui/material/Drawer";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { useEffect, useState } from "react";
-import Perceptron from "./Perceptron";
 import Layer from "./Layer";
 import {setTrainData} from "./api";
-import epoch from "./epoch";
 
 const drawerWidth = 400;
 const layerLimit = 6;
