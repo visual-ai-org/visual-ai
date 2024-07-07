@@ -9,6 +9,7 @@ import {CustomNode} from "./interface/CustomNode";
 import {Weights} from "./interface/WeightObject";
 import {GraphProps} from "./interface/GraphProps";
 
+// add layer
 const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   let r;
   console.log("layersMap", layerPerceptronMap)
@@ -18,6 +19,7 @@ const setBackend = async (layerPerceptronMap: Map<number, number>) => {
   return r
 }
 
+// remove layer
 const resetBackend = async () => {
   for (let i = 0; i < 100; i++) {
     try {
@@ -119,7 +121,8 @@ export default function Network({
   height,
   layerPerceptronMap,
   weights,
-  epoch
+  epoch,
+  training
 }: NetworkProps) {
 
   // TODO: figure out how to store the links and nodes from the map
@@ -215,8 +218,7 @@ export default function Network({
   }
 
   useEffect(() => {
-    const nodes = getNodes(layerPerceptronMap);
-    setNodes(nodes);
+    setNodes(getNodes(layerPerceptronMap));
     setEdges(getEdges(layerPerceptronMap, nodes));
     // if (prevLayers && checkSameLayers(prevLayers, layerPerceptronMap)) {
     setTriggerBackend(!triggerBackend)
@@ -226,17 +228,19 @@ export default function Network({
 
   useEffect(() => {
     console.log("backend update")
-    resetBackend().then(r =>
-        setBackend(layerPerceptronMap).then(
-            r => {
-              // if (checkLayersSize(layerPerceptronMap, r.weights.size)) {
-              //   setTriggerBackend(!triggerBackend)
-              //   return
-              // }
-              setEdges(updateEdgeValue(edges, r.weights))
-            }
-        )
-    )
+    if (!training) {
+      resetBackend().then(r =>
+          setBackend(layerPerceptronMap).then(
+              r => {
+                // if (checkLayersSize(layerPerceptronMap, r.weights.size)) {
+                //   setTriggerBackend(!triggerBackend)
+                //   return
+                // }
+                setEdges(updateEdgeValue(edges, r.weights))
+              }
+          )
+      )
+    }
   }, [triggerBackend]);
 
   useEffect(() => {
@@ -249,7 +253,7 @@ export default function Network({
   useEffect(() => {
     console.log("edges network", edges)
     setGraph({nodes: nodes, links: edges});
-  }, [edges]);
+  }, [edges, nodes]);
 
   return width < 10 ? null : (
     <Box>
@@ -271,7 +275,7 @@ export default function Network({
               y1={source.y}
               x2={target.x}
               y2={target.y}
-              strokeWidth={3 + Number(value)}
+              strokeWidth={5 + Number(value) * 2}
               stroke="#999"
               strokeOpacity={0.6}
               // strokeDasharray={dashed ? '8,4' : undefined}

@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [weights, setWeights] = useState([]);
   const [epoch, setEpoch] = useState([])
+  const [isTraining, setIsTraining] = useState(false)
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -93,6 +94,7 @@ const App: React.FC = () => {
     })
 
     socket.on('training_complete', (data) => {
+      setIsTraining(false)
       console.log('Training complete!');
     });
 
@@ -113,8 +115,8 @@ const App: React.FC = () => {
           <IntroModal open={open} handleClose={handleClose}/>
           {/*<ApiComponent/>*/}
           <ParentSize>{({width, height}) => <Network width={width} height={height}
-                                                     layerPerceptronMap={items} epoch={epoch} weights={weights}/>}</ParentSize>
-          <ControlPanel handleTraining={handleTraining}/>
+                                                     layerPerceptronMap={items} epoch={epoch} weights={weights} training={isTraining}/>}</ParentSize>
+          <ControlPanel handleTraining={handleTraining} setIsTraining={setIsTraining}/>
         </div>
         <div>
           <h2>Weights Updates</h2>
