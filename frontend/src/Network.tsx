@@ -9,6 +9,7 @@ import { CustomLink } from "./interface/CustomLink";
 import { CustomNode } from "./interface/CustomNode";
 import { Weights } from "./interface/WeightObject";
 import { GraphProps } from "./interface/GraphProps";
+import { NodeWrapperProps } from "./interface/NodeWrapper";
 import "./node.css";
 
 // add layer
