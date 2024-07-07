@@ -45,14 +45,14 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
     const perceptronKey = `perceptron ${targetIndex}`;
 
     // Debug log to ensure each iteration is processed
-    console.log(`Processing edge ${index}:`, { sourceLayer, targetLayer, sourceIndex, targetIndex });
-    console.log(sourceLayerKey, perceptronKey, sourceIndex);
+    // console.log(`Processing edge ${index}:`, { sourceLayer, targetLayer, sourceIndex, targetIndex });
+    // console.log(sourceLayerKey, perceptronKey, sourceIndex);
 
     // Check if the source layer and perceptron exist in weights
     if (weights[sourceLayerKey] && weights[sourceLayerKey][perceptronKey]) {
       // Get the weight corresponding to the target index
       const weight = weights[sourceLayerKey][perceptronKey].weights[sourceIndex];
-      console.log(`Weight found: ${weight}`);
+      // console.log(`Weight found: ${weight}`);
       // Update the edge value
       return { ...edge, value: weight };
     }
@@ -67,28 +67,29 @@ const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] =>
 };
 
 const updateNodeValue = (nodes: CustomNode[], weights: Weights): CustomNode[] => {
-  const newNodes = nodes.map(node => {
-    const layer = node.layer
-    const index = node.index
+  const newNodes = nodes.map((node, index) => {
+    const layer = node.layer - 2; // Adjusting the layer to match backend indexing
+    const perceptronIndex = node.index;
 
-    const layerKey = `layer ${layer - 1}`;
-    const perceptronKey = `perceptron ${index}`;
+    const layerKey = `layer ${layer}`;
+    const perceptronKey = `perceptron ${perceptronIndex}`;
 
-    //@ts-ignore
-    if (layer == 0) {
+    // Debug log to ensure each node is processed
+    console.log(`Processing node ${index}:`, { layer, perceptronIndex });
+    console.log(layerKey, perceptronKey);
+
+    if (layer >= 0 && weights[layerKey] && weights[layerKey][perceptronKey]) {
+      node.value = weights[layerKey][perceptronKey].bias;
+      console.log(`Bias found: ${node.value}`);
+    } else {
       node.value = 1
     }
-    else if (layer > 0 && weights[layerKey] && weights[layerKey][perceptronKey]) {
-      node.value = weights[layerKey][perceptronKey].bias
-    } else {
-      console.error(`Invalid layer index: ${layerKey}`)
-    }
 
-    return { ...node}
+    return { ...node };
   });
 
   return newNodes;
-}
+};
 
 const adjustColorIntensity = (color: string, value: number) => {
   // Ensure value is between 0 and 1
