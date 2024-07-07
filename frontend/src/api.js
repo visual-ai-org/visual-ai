@@ -121,7 +121,7 @@ const ApiComponent = () => {
         });
 
         socket.emit('train', {
-            learning_rate: 0.02,
+            learning_rate: 0.2,
             epochs: 100,
         });
 

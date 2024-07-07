@@ -218,12 +218,14 @@ export default function Network({
   }
 
   useEffect(() => {
-    setNodes(getNodes(layerPerceptronMap));
-    setEdges(getEdges(layerPerceptronMap, nodes));
-    // if (prevLayers && checkSameLayers(prevLayers, layerPerceptronMap)) {
-    setTriggerBackend(!triggerBackend)
-    // }
-    // prevLayers = layerPerceptronMap
+    if (!training) {
+      setNodes(getNodes(layerPerceptronMap));
+      setEdges(getEdges(layerPerceptronMap, nodes));
+      // if (prevLayers && checkSameLayers(prevLayers, layerPerceptronMap)) {
+      setTriggerBackend(!triggerBackend)
+      // }
+      // prevLayers = layerPerceptronMap
+    }
   }, [layerPerceptronMap]);
 
   useEffect(() => {
@@ -275,7 +277,7 @@ export default function Network({
               y1={source.y}
               x2={target.x}
               y2={target.y}
-              strokeWidth={5 + Number(value) * 2}
+              strokeWidth={5 + Number(value) * 3}
               stroke="#999"
               strokeOpacity={0.6}
               // strokeDasharray={dashed ? '8,4' : undefined}
