@@ -32,47 +32,37 @@ const resetBackend = async () => {
 }
 
 const updateEdgeValue = (edges: CustomLink[], weights: Weights): CustomLink[] => {
-  const newEdges = edges.map(edge => {
-    const sourceLayer = Number(edge.sourceLayer);
-    const targetLayer = Number(edge.targetLayer);
-    const sourceIndex = edge.sourceIndex;
+  const newEdges = edges.map((edge, index) => {
+    // Frontend layer indices are 1, 2, 3; backend layers are 0, 1
+    // Mapping frontend layer indices to backend layer indices
+    const sourceLayer = Number(edge.sourceLayer) - 1;
+    const targetLayer = Number(edge.targetLayer) - 1;
+    const sourceIndex = Number(edge.sourceIndex);
+    const targetIndex = Number(edge.targetIndex);
 
     // Form the keys for the source layer and perceptron
-    const sourceLayerKey = `layer ${sourceLayer - 1}`;
-    const targetLayerKey = `layer ${targetLayer - 1}`;
-    const perceptronKey = `perceptron ${sourceIndex}`;
+    const sourceLayerKey = `layer ${sourceLayer}`;
+    const perceptronKey = `perceptron ${targetIndex}`;
 
-    // Log the keys to debug
-    console.log(`Layer: ${sourceLayerKey} -> ${targetLayerKey}, perceptron: ${perceptronKey}`);
-    console.log(`Weights: ${JSON.stringify(weights)}`)
-    // if it is input node
-    if (sourceLayer === 1) {
-      const perceptronWeights = weights[sourceLayerKey]['perceptron 0'].weights;
-      edge.value = perceptronWeights[Number(sourceIndex)]
-    }
-    // Check if the keys exist
-    else if (weights[sourceLayerKey]
-        && weights[sourceLayerKey][perceptronKey]) {
-      const perceptronWeights = weights[sourceLayerKey][perceptronKey].weights;
-      const weightIndex = targetLayer - sourceLayer - 1;
+    // Debug log to ensure each iteration is processed
+    console.log(`Processing edge ${index}:`, { sourceLayer, targetLayer, sourceIndex, targetIndex });
+    console.log(sourceLayerKey, perceptronKey, sourceIndex);
 
-      // Log the weightIndex to debug
-      console.log(`weightIndex: ${weightIndex}, perceptronWeights: ${perceptronWeights}`);
-
-      // Check if the weight index is valid
-      if (weightIndex >= 0 && weightIndex < perceptronWeights.length) {
-        edge.value = perceptronWeights[weightIndex];
-        console.log(`Updated edge value to ${edge.value}`)
-      } else {
-        console.error(`Invalid weight index: ${weightIndex} for layer ${sourceLayerKey} -> ${targetLayerKey}`);
-      }
-    } else {
-      console.error(`Invalid keys: Layer ${sourceLayerKey} -> ${targetLayerKey}, perceptron: ${perceptronKey}`);
+    // Check if the source layer and perceptron exist in weights
+    if (weights[sourceLayerKey] && weights[sourceLayerKey][perceptronKey]) {
+      // Get the weight corresponding to the target index
+      const weight = weights[sourceLayerKey][perceptronKey].weights[sourceIndex];
+      console.log(`Weight found: ${weight}`);
+      // Update the edge value
+      return { ...edge, value: weight };
     }
 
-    return { ...edge};
+    // If weight not found, return the edge as it is
+    return { ...edge };
   });
-  console.log("newEdges", newEdges)
+
+  console.log(`Total newEdges length: ${newEdges.length}`);
+  console.log("newEdges", newEdges);
   return newEdges;
 };
 
@@ -135,7 +125,7 @@ export default function Network({
   const [nodes, setNodes] = useState<CustomNode[]>([]);
   const [edges, setEdges] = useState<CustomLink[]>([]);
   const [graph, setGraph] = useState<GraphProps>();
-  // const [triggerBackend, setTriggerBackend] = useState<Boolean>(false)
+  const [triggerBackend, setTriggerBackend] = useState<Boolean>(false)
   // let prevLayers: Map<number, number>;
 
   // const checkSameLayers = (prevLayers: Map<number, number>, newLayers: Map<number, number>): boolean => {
@@ -228,7 +218,7 @@ export default function Network({
     setNodes(nodes);
     setEdges(getEdges(layerPerceptronMap, nodes));
     // if (prevLayers && checkSameLayers(prevLayers, layerPerceptronMap)) {
-    //   setTriggerBackend(!triggerBackend)
+    setTriggerBackend(!triggerBackend)
     // }
     // prevLayers = layerPerceptronMap
   }, [layerPerceptronMap]);
@@ -246,7 +236,7 @@ export default function Network({
             }
         )
     )
-  }, [nodes]);
+  }, [triggerBackend]);
 
   useEffect(() => {
     if (weights[0]) {
