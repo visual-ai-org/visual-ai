@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [weights, setWeights] = useState([]);
   const [epoch, setEpoch] = useState([])
+  const [isTraining, setIsTraining] = useState(false)
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -104,6 +105,7 @@ const App: React.FC = () => {
     return () => {
       socket.disconnect();
       console.log('Disconnected from server');
+      setIsTraining(false)
     }
   };
 
@@ -112,10 +114,13 @@ const App: React.FC = () => {
         <div style={{flex: 1, width: '100vw', height: '100vw'}}>
           <IntroModal open={open} handleClose={handleClose}/>
           {/*<ApiComponent/>*/}
+
           <Typography variant='h1' fontWeight={400} padding={5}> Start training your model! </Typography>
-          <ParentSize>{({width, height}) => <Network width={width} height={height}
-                                                     layerPerceptronMap={items} epoch={epoch} weights={weights}/>}</ParentSize>
-          <ControlPanel handleTraining={handleTraining}/>
+          <ParentSize>{({width, height}) =>
+              <Network width={width} height={height}
+                       layerPerceptronMap={items} epoch={epoch}
+                       weights={weights} training={isTraining}/>}</ParentSize>
+          <ControlPanel handleTraining={handleTraining} setIsTraining={setIsTraining} training={isTraining}/>
         </div>
         <div>
           <h2>Weights Updates</h2>
