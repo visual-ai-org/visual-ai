@@ -94,6 +94,7 @@ export default function ControlPanel({handleTraining, setIsTraining, training, l
             "& .MuiDrawer-paper": {
               width: drawerWidth,
               boxSizing: "border-box",
+              backgroundColor: '#FFF2D7',
             },
           }}
           variant="permanent"
